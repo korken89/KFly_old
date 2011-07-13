@@ -1,0 +1,7 @@
+monitor reset halt
+monitor mww 0x400fc040 1
+monitor flash erase_address 0x00000000 0x00080000
+monitor flash write_image main.elf 0 elf
+file main.elf
+monitor reset halt
+monitor wait_halt

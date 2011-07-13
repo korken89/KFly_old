@@ -1,0 +1,2 @@
+openocd -f openocd-usb.cfg -f lpc1768.cfg
+openocd -f olimex-arm-usb-ocd.cfg -f lpc1768.cfg
