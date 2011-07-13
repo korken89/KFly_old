@@ -22,7 +22,7 @@ void EINT_Init(input_data *sDataLocation)
 
 void EINT_SetNoConnection(void)
 {
-	
+	// WEEEEEEEEEEE
 }
 
 void EINT3_IRQHandler (void)	
