@@ -6,7 +6,7 @@ void main( void )
 	prvSetupHardware();
 
 	/* Load Tasks */
-	xTaskCreate(vTask1,
+	/*xTaskCreate(vTask1,
 				"Blink",
 				20,
 				NULL,
@@ -18,7 +18,7 @@ void main( void )
 				80,
 				NULL,
 				2,
-				NULL);
+				NULL);*/
 				
 	/*xTaskCreate(vTask3,
 				"Check",
@@ -28,7 +28,7 @@ void main( void )
 				NULL);*/
 	
 	/* Start the scheduler. */
-	vTaskStartScheduler();
+	//vTaskStartScheduler();
 
 	/* 	Will only get here if there was insufficient memory to create the idle
 		task.  The idle task is created within vTaskStartScheduler(). */
@@ -41,16 +41,16 @@ void prvSetupHardware( void )
 	LED_Init();
 	UART_Init();
 	//GPS_UART_Init();
-	//Timer1_Init();
-	//Timer2_Init();
 	PWM_Init();
 	I2C0_Init();
+	EINT_Init();
+	//vInitInputs();
 	SystemInit();
 	__enable_irq();
 	BMA180_Init(BW_150HZ, RANGE_2G);
 	ITG3200_Init();
+
 }
-/*-----------------------------------------------------------*/
 
 void vTask1(void *pvParameters)
 {
@@ -73,10 +73,8 @@ void vTask2(void *pvParameters)
 	while (1)
 	{
 
-		for (volatile int i = 0; i < 100000; i++);
-
-
-		vTaskDelayUntil(&xLastWakeTime, 100 / portTICK_RATE_MS);
+		
+		vTaskDelayUntil(&xLastWakeTime, 500 / portTICK_RATE_MS);
 	}
 }
 
@@ -96,6 +94,3 @@ void vConfigureTimerForRunTimeStats( void )
 {
 	Timer1_Init();
 }
-
-/*-----------------------------------------------------------*/
-

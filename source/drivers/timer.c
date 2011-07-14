@@ -7,9 +7,6 @@
 
 #include "timer.h"
 
-/**
- * @brief Timer0 is for the Kalman filter and regulation loops.
- */
 void Timer0_Init(void)
 {
 	LPC_SC->PCONP |= (1<<PCTIM0);			// Power up the timer
@@ -61,7 +58,6 @@ void Timer2_StopCount(void)
 
 void Timer0_IRQHandler(void)
 {
-	static uint8_t i = 0;
 	LPC_TIM0->IR |= (1<<0);					// Clear interupt
 	EINT_NoConnectionCheck();
 }

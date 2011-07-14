@@ -17,13 +17,11 @@
 
 struct _input_data
 {
-	uint8_t status;		// bit cleared = functioning normaly, bit set = connection lost
-						// bit 1 = ch1, bit 2 = ch2, ... bit 6 = ch6	
 	int16_t ch[6];		// Channel values
 };
 typedef struct _input_data input_data;
 
-void EINT_Init(input_data *sDataLocation); 
+void EINT_Init(void); 
 void EINT_NoConnectionCheck(void);
 void EINT3_IRQHandler(void);
 
