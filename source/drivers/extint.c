@@ -1,6 +1,7 @@
 #include "extint.h"
 
 volatile static input_data *sData;
+volatile static uint8_t check = 0;
 
 void EINT_Init(input_data *sDataLocation)	
 { 
@@ -20,24 +21,31 @@ void EINT_Init(input_data *sDataLocation)
 	NVIC_EnableIRQ(EINT3_IRQn);				//Enable Interrupts for GPIO
 }
 
-void EINT_SetNoConnection(void)
+void EINT_NoConnectionCheck(void)
 {
-	
+	if (check == 0)
+		check++;
+	else if (check > 0)
+		sData->status |= 0b01111110;		// No connection on all inputs
 }
 
 void EINT3_IRQHandler (void)	
 {	
-	static uint32_t temp[6] = {0, 0, 0, 0, 0, 0};
-	static uint32_t ch_timing[6] = {0, 0, 0, 0, 0, 0};
+	static uint32_t temp[6] = {0, 0, 0, 0, 0, 0};			// Temporary measurement data
+	static uint32_t ch_timing[6] = {0, 0, 0, 0, 0, 0};		// No connection counter
+	
+	uint32_t statF = LPC_GPIOINT->IO0IntStatF & INTMASK;	// Get status on all falling edge interrupts
+	uint32_t statR = LPC_GPIOINT->IO0IntStatR & INTMASK;	// Get status on all rising edge interrupts
+	LPC_GPIOINT->IO0IntClr = INTMASK;						// Clear all interrupts
+	
 	uint32_t Ticks = GetTickCount();
-	uint32_t statF = LPC_GPIOINT->IO0IntStatF & INTMASK;
-	uint32_t statR = LPC_GPIOINT->IO0IntStatR & INTMASK;
-	LPC_GPIOINT->IO0IntClr = INTMASK;
+	check = 0;			// Reset check counter
 	
 	/**
 	 * 	Channel 1 - 6 check and measurement.
 	 *  If there are no inputs the checks can't be made so another function
 	 *  in a timer interrupt will check the status of the whole thing.
+	 * 	But if one or more inputs are avalible then this function will check them.
 	 **/
 	
 	for (uint8_t i = 0; i < 6; i++)
@@ -49,7 +57,7 @@ void EINT3_IRQHandler (void)
 		{
 			sData->ch[i] = Ticks - temp[i];			// Calculate
 			ch_timing[i] = Ticks;					// Reset counter for no connection bit
-			sData->status &= (1<<(i+1));			// If the no connection bit was set, clear it
+			sData->status &= (1<<(i+1));			// Clear the no connection bit
 			
 		}
 		else if ((Ticks - ch_timing[i]) > 200000) 	// No signal for 10 periods (200ms) set no connection bit

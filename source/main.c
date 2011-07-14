@@ -30,8 +30,8 @@ void main( void )
 	/* Start the scheduler. */
 	vTaskStartScheduler();
 
-	/* Will only get here if there was insufficient memory to create the idle
-	task.  The idle task is created within vTaskStartScheduler(). */
+	/* 	Will only get here if there was insufficient memory to create the idle
+		task.  The idle task is created within vTaskStartScheduler(). */
 	while(1);
 }
 
@@ -44,7 +44,6 @@ void prvSetupHardware( void )
 	//Timer1_Init();
 	//Timer2_Init();
 	PWM_Init();
-	EINT_Init();
 	I2C0_Init();
 	SystemInit();
 	__enable_irq();
@@ -74,7 +73,7 @@ void vTask2(void *pvParameters)
 	while (1)
 	{
 
-		
+		for (volatile int i = 0; i < 100000; i++);
 
 
 		vTaskDelayUntil(&xLastWakeTime, 100 / portTICK_RATE_MS);
