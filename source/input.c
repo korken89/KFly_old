@@ -32,6 +32,10 @@ uint8_t GetInputStatus(void)
 	return status;
 }
 
+/**
+ * Resets old calibrated values in order for new
+ * values to be written.
+ **/
 void ResetCalibration(void)
 {
 	for (uint8_t i = 0; i < 6; i++)
@@ -76,6 +80,11 @@ void CalibrateCenterLevels(void)
 		else
 			sInputCalibration.ch_center[i] = GetRawInputLevel(i);	
 	}
+}
+
+void SaveCalibratedDataToFlashBuffer(void)
+{
+	/* Save all calibrated data to the flash buffer function goes here... */
 }
 
 /**

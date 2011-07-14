@@ -18,7 +18,8 @@ void vInitInputs(void);
 uint8_t GetInputStatus(void);
 void ResetCalibration(void);
 void CalibrateInputLevels(void);
-void CalibrateCenterLevels(void);		
+void CalibrateCenterLevels(void);
+void SaveCalibratedDataToFlashBuffer(void);		
 float GetInputLevel(uint8_t);
 uint16_t GetRawInputLevel(uint8_t);
 
