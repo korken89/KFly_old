@@ -17,7 +17,7 @@
 /* Application includes */
 #include "leds.h"
 #include "uart.h"
-#include "extint.h"
+#include "input.h"
 #include "pwm.h"
 //#include "gps.h"
 #include "sensors.h"

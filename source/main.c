@@ -6,7 +6,7 @@ void main( void )
 	prvSetupHardware();
 
 	/* Load Tasks */
-	/*xTaskCreate(vTask1,
+	xTaskCreate(vTask1,
 				"Blink",
 				20,
 				NULL,
@@ -18,17 +18,10 @@ void main( void )
 				80,
 				NULL,
 				2,
-				NULL);*/
-				
-	/*xTaskCreate(vTask3,
-				"Check",
-				240,
-				NULL,
-				2,
-				NULL);*/
+				NULL);
 	
 	/* Start the scheduler. */
-	//vTaskStartScheduler();
+	vTaskStartScheduler();
 
 	/* 	Will only get here if there was insufficient memory to create the idle
 		task.  The idle task is created within vTaskStartScheduler(). */
@@ -43,8 +36,8 @@ void prvSetupHardware( void )
 	//GPS_UART_Init();
 	PWM_Init();
 	I2C0_Init();
-	EINT_Init();
-	//vInitInputs();
+	//EINT_Init();
+	vInitInputs();
 	SystemInit();
 	__enable_irq();
 	BMA180_Init(BW_150HZ, RANGE_2G);
@@ -72,21 +65,15 @@ void vTask2(void *pvParameters)
 	
 	while (1)
 	{
-
+		for (uint8_t i = 0; i < 6; i++)
+		{
+			UART0_SendString(itoa(GetRawInputLevel(i), 10));
+			UART0_SendChar('\t');
+		}
 		
-		vTaskDelayUntil(&xLastWakeTime, 500 / portTICK_RATE_MS);
-	}
-}
-
-void vTask3(void *pvParameters)
-{
-	static signed char buffer[100] = {0};
-	while (1)
-	{
-		vTaskDelay(5000 / portTICK_RATE_MS);
-		//vTaskGetRunTimeStats(buffer);
-		//UART0_SendString(buffer);
-		//UART0_SendString("Pitch:");
+		UART0_SendChar('\n');
+		
+		vTaskDelayUntil(&xLastWakeTime, 100 / portTICK_RATE_MS);
 	}
 }
 

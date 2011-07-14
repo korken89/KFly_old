@@ -22,6 +22,7 @@ struct _input_data
 typedef struct _input_data input_data;
 
 void EINT_Init(void); 
+input_data *EINT_GetPointerToValues(void);
 void EINT_NoConnectionCheck(void);
 void EINT3_IRQHandler(void);
 

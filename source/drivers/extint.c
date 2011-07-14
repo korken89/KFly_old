@@ -1,7 +1,7 @@
 #include "extint.h"
 
-volatile static input_data sData;
-volatile static uint8_t check = 0;
+volatile input_data sData;
+volatile uint8_t check = 0;
 
 void EINT_Init(void)	
 { 
@@ -26,16 +26,13 @@ void EINT_Init(void)
 	NVIC_EnableIRQ(EINT3_IRQn);				//Enable Interrupts for GPIO
 }
 
+input_data *EINT_GetPointerToValues(void)
+{
+	return (input_data *)&sData;
+}
+
 void EINT_NoConnectionCheck(void)
 {
-	for (uint8_t i = 0; i < 6; i++)
-	{
-		UART0_SendString(itoa(sData.ch[i], 10));
-		UART0_SendChar('\t');
-	}
-	
-	UART0_SendChar('\n');
-	
 	if (check == 0)
 		check++;
 	else if (check > 0)
