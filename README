@@ -1,0 +1,14 @@
+
+
+Memory map for the Flash Stored variables:
+
+ ---------------
+|	   512k		|
+|---------------|
+|	 pid_cal	| 6 words
+|---------------|
+|	input_cal	| 9 words
+ ---------------
+		480k
+		////
+		 0k

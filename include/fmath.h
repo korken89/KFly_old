@@ -8,7 +8,8 @@
 
 float fInvSqrt(float);
 void ftoa(float);
-float fabs(float num);
+float fabs(float);
 float fArctan2(float, float);
+uint8_t ksizeof(char *);
 
 #endif

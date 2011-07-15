@@ -65,9 +65,9 @@ void vTask2(void *pvParameters)
 	
 	while (1)
 	{
-		for (uint8_t i = 0; i < 6; i++)
+		for (uint8_t i = 0; i < 4; i++)
 		{
-			UART0_SendString(itoa(GetRawInputLevel(i), 10));
+			ftoa(GetInputLevel(i));
 			UART0_SendChar('\t');
 		}
 		

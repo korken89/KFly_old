@@ -29,9 +29,14 @@ void ftoa(float a)
 	
 	int heltal = (int)a;
 	int decimal = (int)((a-(float)heltal)*1000);
+	char *temp;
+	temp = itoa(decimal,10);
 	UART0_SendString(itoa(heltal,10));
+	
 	UART0_SendChar('.');
-	UART0_SendString(itoa(decimal,10));
+	for (uint8_t i = 3 - ksizeof(temp); i>0; i--)
+		UART0_SendChar('0');
+	UART0_SendString(temp);
 }
 
 float fabs(float num)
@@ -66,3 +71,13 @@ float fArctan2(float y, float x)
 	else
 		return angle;
 }
+
+uint8_t ksizeof(char *string)
+{
+	uint8_t temp = 0;
+	while (*(string++))
+		temp++;
+		
+	return temp;
+}
+	
