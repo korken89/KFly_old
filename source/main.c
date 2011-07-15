@@ -13,8 +13,8 @@ void main( void )
 				2,
 				NULL);
 				
-	xTaskCreate(vTask2,
-				"Data",
+	xTaskCreate(vTaskControlLoop,
+				"Control",
 				80,
 				NULL,
 				2,
@@ -38,6 +38,7 @@ void prvSetupHardware( void )
 	I2C0_Init();
 	//EINT_Init();
 	vInitInputs();
+	Timer2_Init();
 	SystemInit();
 	__enable_irq();
 	BMA180_Init(BW_150HZ, RANGE_2G);
@@ -59,19 +60,32 @@ void vTask1(void *pvParameters)
 	}
 }
 
-void vTask2(void *pvParameters)
+void vTaskControlLoop(void *pvParameters)
 {
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	
+	float acc_tmp[2];
+	float gyro_tmp[3];
+	kalman_data data_xz;
+	kalman_data data_yz;
+	
+	vInitKalman(&data_xz);
+	vInitKalman(&data_yz);
+	
 	while (1)
 	{
-		for (uint8_t i = 0; i < 4; i++)
-		{
-			ftoa(GetInputLevel(i));
-			UART0_SendChar('\t');
-		}
+		vReadAccAngle(acc_tmp);
+		vReadGyroRate(gyro_tmp);
 		
-		UART0_SendChar('\n');
+		vUpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
+		vUpdKalman(&data_yz, acc_tmp[1], gyro_tmp[1]);
+		
+		/*ftoa(data_xz.x1);
+		UART0_SendChar('\t');
+		
+		ftoa(data_yz.x1);
+		
+		UART0_SendChar('\n');*/
 		
 		vTaskDelayUntil(&xLastWakeTime, 100 / portTICK_RATE_MS);
 	}

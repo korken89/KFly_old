@@ -27,8 +27,7 @@
 void prvSetupHardware( void );
 void main(void);
 void vTask1(void *);
-void vTask2(void *);
-void vTask3(void *);
+void vTaskControlLoop(void *);
 void vConfigureTimerForRunTimeStats(void);
 
 #endif

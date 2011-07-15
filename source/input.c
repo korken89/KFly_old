@@ -65,6 +65,7 @@ void ResetCalibration(void)
 
 /**
  * Calibrates the top and bottom level of the inputs.
+ * Loop it while calibrating
  **/
 void CalibrateInputLevels(void)
 {
@@ -81,8 +82,9 @@ void CalibrateInputLevels(void)
 /**
  * Calibrates the center level of the inputs.
  * 
- * If the vaules are withing 10% of top or bottom then the
- * center value will equal top or bottom when calibrated.
+ * If the vaules are withing 12.5% of top or bottom then the
+ * center value will equal top or bottom when calibrated in order 
+ * to get -100 to 100%, 0 to 100% and -100 to 0%.
  **/
 void CalibrateCenterLevels(void)
 {
