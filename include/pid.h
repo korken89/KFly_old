@@ -10,27 +10,29 @@
 #define ROLL_CHANNEL		GetInputLevel(4)
 #define YAW_CHANNEL			GetInputLevel(1)
 
+// Maximum angle of the aircraft in stability mode (in deg)
+#define MAX_ANGLE		30.0f	// 30 deg max
 
-// Maximum angle of the aircraft in stability mode
-#define MAX_ANGLE		30.0f
+// Maximum angular rate of the aircraft in acrobatic mode (in deg/s)
+#define MAX_RATE		180.0f	// 180 deg/s max
 
 // Safeguards so the regulator won't overflow
-#define PID_IMAX		100000.0f
-#define PID_IMIN		-100000.0f
+#define PID_IMAX		1000000.0f
+#define PID_IMIN		-1000000.0f
 
 struct _pid_data {
     float iState;		// Integrator state
     float eState;		// Error state
-    float ki;			// Integral gain ki = K/Ti*h
-    float kp;			// Proportional gain kp = K*Td/h
-    float kd;			// Derivative gain
+    float ki;			// Integral gain ki = Ki*h
+    float kp;			// Proportional gain 
+    float kd;			// Derivative gain kp = Kp/h
     float km;			// Motor gain
 };
 typedef struct _pid_data pid_data;
 
 void PIDInit(pid_data *);
-void PIDUpdatePitch(pid_data *, kalman_data *);
-void PIDUpdateRoll(pid_data *, kalman_data *);
-void PIDUpdateYaw(pid_data *, float);
+float PIDUpdatePitch(pid_data *, kalman_data *);
+float PIDUpdateRoll(pid_data *, kalman_data *);
+float PIDUpdateYaw(pid_data *, float);
 
 #endif

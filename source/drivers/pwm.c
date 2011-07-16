@@ -14,37 +14,41 @@ void PWM_Init(void)
     LPC_PWM1->PCR &= ~((1<<PWMSEL2)|(1<<PWMSEL3)|(1<<PWMSEL4)|(1<<PWMSEL5)|(1<<PWMSEL6)); 	// Single edge PWM
     LPC_PWM1->PCR |= (1<<PWMENA1)|(1<<PWMENA2)|(1<<PWMENA3)|(1<<PWMENA4);					//Enable channel 1, 2, 3 and 4.
         
-    PWM_setOutput(500, 1);
+	for (uint8_t i = 0; i < 6; i++)
+		PWM_setOutput(0, i);
 }
 
-void PWM_setOutput(uint16_t value, uint8_t channel)
+void PWM_setOutput(int16_t value, uint8_t channel)
 {
 	if (value > MAX_PWM)
 		value = MAX_PWM;
+	
+	else if (value < 0)
+		value = 0;
 		
     switch(channel)
     {
-		case 1:
+		case 0:
 			LPC_PWM1->MR1 = 1499-value;
 			break;
             
-		case 2:
+		case 1:
 			LPC_PWM1->MR2 = 1499-value;
 			break;
             
-		case 3:
+		case 2:
 			LPC_PWM1->MR3 = 1499-value;
             break;
             
-        case 4:
+        case 3:
 			LPC_PWM1->MR4 = 1499-value;
             break;
             
-		case 5:
+		case 4:
 			LPC_PWM1->MR5 = 1499-value;
             break;
             
-        case 6:
+        case 5:
 			LPC_PWM1->MR6 = 1499-value;
             break;
             

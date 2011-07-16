@@ -6,6 +6,6 @@
 #define MAX_PWM		1000
 
 void PWM_Init(void);
-void PWM_setOutput(uint16_t, uint8_t);
+void PWM_setOutput(int16_t, uint8_t);
 
 #endif
