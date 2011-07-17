@@ -15,7 +15,7 @@ void main( void )
 				
 	xTaskCreate(vTaskControlLoop,
 				"Control",
-				80,
+				200,
 				NULL,
 				2,
 				NULL);
@@ -64,8 +64,10 @@ void vTaskControlLoop(void *pvParameters)
 	
 	float acc_tmp[2];
 	float gyro_tmp[3];
+	float pid_tmp[3];
 	kalman_data data_xz;
 	kalman_data data_yz;
+	
 	pid_data data_roll;
 	pid_data data_pitch;
 	
@@ -81,6 +83,10 @@ void vTaskControlLoop(void *pvParameters)
 		
 		UpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
 		UpdKalman(&data_yz, acc_tmp[1], gyro_tmp[1]);
+		
+		pid_tmp[0] = PIDUpdatePitch(&data_pitch, &data_xz);
+		pid_tmp[1] = PIDUpdateRoll(&data_roll, &data_yz);
+		
 		
 		/*ftoa(data_xz.x1);
 		UART0_SendChar('\t');
