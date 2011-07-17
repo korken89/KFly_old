@@ -18,7 +18,7 @@ struct _kalman_data
 };
 typedef struct _kalman_data kalman_data;
 
-void vInitKalman(kalman_data *data);
-void vUpdKalman(kalman_data *data, float z1, float z2);
+void InitKalman(kalman_data *data);
+void UpdKalman(kalman_data *data, float z1, float z2);
 
 #endif

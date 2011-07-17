@@ -5,7 +5,7 @@
 
 #include "kalman.h"
 
-void vInitKalman(kalman_data *data)
+void InitKalman(kalman_data *data)
 {
 	data->x1 = 0.0f;
 	data->x2 = 0.0f;
@@ -21,7 +21,7 @@ void vInitKalman(kalman_data *data)
 	data->p33 = 1000.0f;
 }
 
-void vUpdKalman(kalman_data *data, float z1, float z2)
+void UpdKalman(kalman_data *data, float z1, float z2)
 {
 	float y1, y2;
 	float a, b, c;

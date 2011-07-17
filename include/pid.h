@@ -26,11 +26,11 @@ struct _pid_data {
     float ki;			// Integral gain ki = Ki*h
     float kp;			// Proportional gain 
     float kd;			// Derivative gain kp = Kp/h
-    float km;			// Motor gain
+    float km;			// Motor gain: km = Kv*[battery voltage]/PWM_MAX
 };
 typedef struct _pid_data pid_data;
 
-void PIDInit(pid_data *);
+void InitPID(pid_data *);
 float PIDUpdatePitch(pid_data *, kalman_data *);
 float PIDUpdateRoll(pid_data *, kalman_data *);
 float PIDUpdateYaw(pid_data *, float);

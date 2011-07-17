@@ -13,9 +13,9 @@
 #define configFLIP_GYRO_Y	1
 #define configFLIP_GYRO_Z	0
 
-void vReadAcc(float *);
-void vReadGyroRate(float *);
-void vReadAccAngle(float *);
+void ReadAcc(float *);
+void ReadGyroRate(float *);
+void ReadAccAngle(float *);
 
 #endif
 

@@ -4,7 +4,7 @@
 
 #include "sensors.h"
 
-void vReadAcc(float *data)
+void ReadAcc(float *data)
 {
 	int16_t temp[3];
 	BMA180_BurstRead(temp);
@@ -35,7 +35,7 @@ void vReadAcc(float *data)
 /**
  * Returns an arrays with X, Y and Z in deg/s.
  **/
-void vReadGyroRate(float *data)
+void ReadGyroRate(float *data)
 {
 	int16_t temp[3];
 	ITG3200_BurstRead(temp);
@@ -70,10 +70,10 @@ void vReadGyroRate(float *data)
  * 
  * Works for -90 to 90 degrees.
  **/
-void vReadAccAngle(float *data)
+void ReadAccAngle(float *data)
 {
 	float temp[3];
-	vReadAcc(temp);
+	ReadAcc(temp);
 		
 	float zsq = temp[2]*temp[2];
 	float xz = fInvSqrt(temp[0]*temp[0]+zsq);

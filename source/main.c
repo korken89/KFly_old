@@ -36,14 +36,12 @@ void prvSetupHardware( void )
 	//GPS_UART_Init();
 	PWM_Init();
 	I2C0_Init();
-	//EINT_Init();
 	vInitInputs();
 	Timer2_Init();
 	SystemInit();
 	__enable_irq();
 	BMA180_Init(BW_150HZ, RANGE_2G);
 	ITG3200_Init();
-
 }
 
 void vTask1(void *pvParameters)
@@ -68,17 +66,21 @@ void vTaskControlLoop(void *pvParameters)
 	float gyro_tmp[3];
 	kalman_data data_xz;
 	kalman_data data_yz;
+	pid_data data_roll;
+	pid_data data_pitch;
 	
-	vInitKalman(&data_xz);
-	vInitKalman(&data_yz);
+	InitKalman(&data_xz);
+	InitKalman(&data_yz);
+	InitPID(&data_roll);
+	InitPID(&data_pitch);
 	
 	while (1)
 	{
-		vReadAccAngle(acc_tmp);
-		vReadGyroRate(gyro_tmp);
+		ReadAccAngle(acc_tmp);
+		ReadGyroRate(gyro_tmp);
 		
-		vUpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
-		vUpdKalman(&data_yz, acc_tmp[1], gyro_tmp[1]);
+		UpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
+		UpdKalman(&data_yz, acc_tmp[1], gyro_tmp[1]);
 		
 		/*ftoa(data_xz.x1);
 		UART0_SendChar('\t');

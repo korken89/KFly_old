@@ -24,6 +24,7 @@
 #include "sensors.h"
 #include "misc.h"
 #include "kalman.h"
+#include "pid.h"
 
 void prvSetupHardware( void );
 void main(void);
