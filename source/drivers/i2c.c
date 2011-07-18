@@ -57,6 +57,11 @@ void I2C_WaitForSI(LPC_I2C_TypeDef *I2Cx)
 	while (!(I2Cx->I2CONSET & (1<<SI)));
 }
 
+int I2C_CheckForSI(LPC_I2C_TypeDef *I2Cx)
+{
+	return (I2Cx->I2CONSET & (1<<SI));
+}
+
 void I2C_Write(LPC_I2C_TypeDef *I2Cx, uint8_t data)
 {
 	I2Cx->I2DAT = data;

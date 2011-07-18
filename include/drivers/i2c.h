@@ -19,6 +19,7 @@ void I2C_ClearStart(LPC_I2C_TypeDef *);
 void I2C_ClearStop(LPC_I2C_TypeDef *);
 void I2C_ClearSI(LPC_I2C_TypeDef *);
 void I2C_WaitForSI(LPC_I2C_TypeDef *);
+int I2C_CheckForSI(LPC_I2C_TypeDef *);
 void I2C_Write(LPC_I2C_TypeDef *, uint8_t);
 uint8_t I2C_Read(LPC_I2C_TypeDef *);
 uint8_t I2C_ReadStatus(LPC_I2C_TypeDef *);

@@ -6,7 +6,7 @@ void main( void )
 	prvSetupHardware();
 
 	/* Load Tasks */
-	xTaskCreate(vTask1,
+	/*xTaskCreate(vTask1,
 				"Blink",
 				20,
 				NULL,
@@ -18,7 +18,7 @@ void main( void )
 				200,
 				NULL,
 				2,
-				NULL);
+				NULL);*/
 				
 	xTaskCreate(vTaskArmDisarm,
 				"Arm/Disarm",
@@ -32,7 +32,11 @@ void main( void )
 
 	/* 	Will only get here if there was insufficient memory to create the idle
 		task.  The idle task is created within vTaskStartScheduler(). */
-	while(1);
+	float temp[3];
+	while(1)
+	{
+
+	}
 }
 
 void prvSetupHardware( void )
@@ -85,14 +89,14 @@ void vTaskControlLoop(void *pvParameters)
 	
 	while (1)
 	{
-		ReadAccAngle(acc_tmp);
+		//ReadAccAngle(acc_tmp);
 		ReadGyroRate(gyro_tmp);
 		
-		UpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
+		/*UpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
 		UpdKalman(&data_yz, acc_tmp[1], gyro_tmp[1]);
 		
 		pid_tmp[0] = PIDUpdatePitch(&data_pitch, &data_xz);
-		pid_tmp[1] = PIDUpdateRoll(&data_roll, &data_yz);
+		pid_tmp[1] = PIDUpdateRoll(&data_roll, &data_yz);*/
 		
 		
 		/*ftoa(data_xz.x1);
@@ -102,7 +106,7 @@ void vTaskControlLoop(void *pvParameters)
 		
 		UART0_SendChar('\n');*/
 		
-		vTaskDelayUntil(&xLastWakeTime, 100 / portTICK_RATE_MS);
+		vTaskDelayUntil(&xLastWakeTime, 10 / portTICK_RATE_MS);
 	}
 }
 

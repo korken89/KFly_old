@@ -8,10 +8,13 @@
 #include "itg3200.h"
 #include "uart.h"
 
+volatile int pos = 0;
+volatile int stat = 0;
+
 void ITG3200_Init(void)
 {
 	ITG3200_Write(PWR_M, 0x80);				// Reset to defaults
-	ITG3200_Write(SMPL, 99);				// SMLPRT_DIV = 100
+	ITG3200_Write(SMPL, 9);				// SMLPRT_DIV = 10
 	ITG3200_Write(DLPF, (3<<3)|(3<<0));		// DLPF_CFG = 0, FS_SEL = 3
 	ITG3200_Write(INT_C, INT_CONFIG);		// Generate interrupt when device is ready or raw data ready
 	ITG3200_Write(PWR_M, 0x00);				// Normal operating conditions
@@ -20,7 +23,7 @@ void ITG3200_Init(void)
 /**
  * @brief 	Reads the X, Y and Z register and wites it to a uint16_t buffer of size 3.
  * 			Example: 	uint16_t buff[3];
- * 						ITG3200_BurstRead(buff);  <-- buff will now contain X, Y and Z.
+ * 						ITG3200_BurstRead(buffer);  <-- buffer will now contain X, Y and Z.
  * 
  */
 void ITG3200_BurstRead(int16_t *buffer)
@@ -38,35 +41,40 @@ void ITG3200_BurstRead(int16_t *buffer)
 	 
 	/** Start **/
 	I2C_SendStart(LPC_I2C0);
+	pos = 1;
 	I2C_WaitForSI(LPC_I2C0);
-
+	stat = I2C_ReadStatus(LPC_I2C0);
 	//UART0_SendChar(I2C_ReadStatus(LPC_I2C0));		//For debugg purpose. Sends the status of the I2C.
 
 	I2C_ClearSI(LPC_I2C0);
 	I2C_Write(LPC_I2C0, ITG3200_W);
 	I2C_ClearStart(LPC_I2C0);
+	pos = 2;
 	I2C_WaitForSI(LPC_I2C0);
-	
+	stat = I2C_ReadStatus(LPC_I2C0);
 	//UART0_SendChar(I2C_ReadStatus(LPC_I2C0));
 	
 	I2C_ClearSI(LPC_I2C0);
 	I2C_Write(LPC_I2C0, GX_H);
+	pos = 3;
 	I2C_WaitForSI(LPC_I2C0);
-	
+	stat = I2C_ReadStatus(LPC_I2C0);
 	//UART0_SendChar(I2C_ReadStatus(LPC_I2C0));
 	
 	/** Here starts the recieve part **/
 	I2C_ClearSI(LPC_I2C0);
 	I2C_SendStart(LPC_I2C0);
+	pos = 4;
 	I2C_WaitForSI(LPC_I2C0);
-	
+	stat = I2C_ReadStatus(LPC_I2C0);
 	//UART0_SendChar(I2C_ReadStatus(LPC_I2C0));
 	
 	I2C_ClearSI(LPC_I2C0);
 	I2C_Write(LPC_I2C0, ITG3200_R);
 	I2C_ClearStart(LPC_I2C0);
+	pos = 5;
 	I2C_WaitForSI(LPC_I2C0);
-	
+	stat = I2C_ReadStatus(LPC_I2C0);
 	//UART0_SendChar(I2C_ReadStatus(LPC_I2C0));
 	/**
 	 * Burst-read X, Y and Z registers and put them in the specified buffer.
@@ -83,8 +91,9 @@ void ITG3200_BurstRead(int16_t *buffer)
 		/** The I2C is reciveing the data here... **/
 
 		/** Read **/
+		pos = 6 + i;
 		I2C_WaitForSI(LPC_I2C0);
-		
+		stat = I2C_ReadStatus(LPC_I2C0);
 		if (i & 0x01)
 			*(buffer + i/2) |= (int16_t)I2C_Read(LPC_I2C0);
 		else
