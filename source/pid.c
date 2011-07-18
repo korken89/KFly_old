@@ -22,7 +22,7 @@ void InitPID(pid_data *PID)
 float PIDUpdatePitch(pid_data *PID, kalman_data *data)
 {	
 	float der;
-	PID->iState = PID->iState + (MAX_ANGLE*PITCH_CHANNEL - data->x1)*PID->ki;
+	PID->iState = PID->iState + (MAX_ANGLE*GetInputLevel(PITCH_CHANNEL) - data->x1)*PID->ki;
 	
 	if (PID->iState > PID_IMAX)
 		PID->iState = PID_IMAX;
@@ -37,7 +37,7 @@ float PIDUpdatePitch(pid_data *PID, kalman_data *data)
 float PIDUpdateRoll(pid_data *PID, kalman_data *data)
 {
 	float der;
-	PID->iState = PID->iState + (MAX_ANGLE*ROLL_CHANNEL - data->x1)*PID->ki;
+	PID->iState = PID->iState + (MAX_ANGLE*GetInputLevel(ROLL_CHANNEL) - data->x1)*PID->ki;
 	
 	if (PID->iState > PID_IMAX)
 		PID->iState = PID_IMAX;

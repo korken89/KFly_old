@@ -10,7 +10,7 @@ void main( void )
 				"Blink",
 				20,
 				NULL,
-				2,
+				1,
 				NULL);
 				
 	xTaskCreate(vTaskControlLoop,
@@ -18,6 +18,13 @@ void main( void )
 				200,
 				NULL,
 				2,
+				NULL);
+				
+	xTaskCreate(vTaskArmDisarm,
+				"Arm/Disarm",
+				40,
+				NULL,
+				1,
 				NULL);
 	
 	/* Start the scheduler. */
@@ -96,6 +103,42 @@ void vTaskControlLoop(void *pvParameters)
 		UART0_SendChar('\n');*/
 		
 		vTaskDelayUntil(&xLastWakeTime, 100 / portTICK_RATE_MS);
+	}
+}
+
+void vTaskArmDisarm(void *pvParameters)
+{
+	portTickType xLastWakeTime = xTaskGetTickCount();
+	static uint16_t arm_counter = 0;
+	static uint16_t disarm_counter = 0;
+	
+	while (1)
+	{
+		if (arm_counter > 99)
+		{
+			arm_counter = 0;
+			disarm_counter = 0;
+			setLED(1);
+			setLED(2);
+		}
+		else if ((GetInputLevel(THROTTLE_CHANNEL) < 0.05f) && (GetInputLevel(YAW_CHANNEL) < -0.95f))
+			arm_counter++;
+		else
+			arm_counter = 0;
+			
+		if (disarm_counter > 99)
+		{
+			arm_counter = 0;
+			disarm_counter = 0;
+			clearLED(1);
+			clearLED(2);
+		}
+		else if ((GetInputLevel(THROTTLE_CHANNEL) < 0.05f) && (GetInputLevel(YAW_CHANNEL) > 0.95f))
+			disarm_counter++;
+		else
+			disarm_counter = 0;
+			
+		vTaskDelayUntil(&xLastWakeTime, 10 / portTICK_RATE_MS);
 	}
 }
 

@@ -1,20 +1,9 @@
 #ifndef PID_H
 #define PID_H
 
+#include "configKFly.h"
 #include "kalman.h"
 #include "input.h"
-
-// Input channels
-#define THROTTLE_CHANNEL	GetInputLevel(2)
-#define PITCH_CHANNEL		GetInputLevel(3)
-#define ROLL_CHANNEL		GetInputLevel(4)
-#define YAW_CHANNEL			GetInputLevel(1)
-
-// Maximum angle of the aircraft in stability mode (in deg)
-#define MAX_ANGLE		30.0f	// 30 deg max
-
-// Maximum angular rate of the aircraft in acrobatic mode (in deg/s)
-#define MAX_RATE		180.0f	// 180 deg/s max
 
 // Safeguards so the regulator won't overflow
 #define PID_IMAX		1000000.0f

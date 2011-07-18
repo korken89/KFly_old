@@ -14,6 +14,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+/* KFly includes */
+#include "configKFly.h"
+
 /* Application includes */
 #include "leds.h"
 #include "uart.h"
@@ -30,6 +33,7 @@ void prvSetupHardware( void );
 void main(void);
 void vTask1(void *);
 void vTaskControlLoop(void *);
+void vTaskArmDisarm(void *);
 void vConfigureTimerForRunTimeStats(void);
 
 #endif
