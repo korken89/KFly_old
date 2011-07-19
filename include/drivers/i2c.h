@@ -96,23 +96,15 @@ typedef struct
 													used in interrupt transfer mode */
 } I2C_M_SETUP_Type;
 
+typedef enum {
+	I2C_TRANSFER_POLLING = 0,		/**< Transfer in polling mode */
+	I2C_TRANSFER_INTERRUPT			/**< Transfer in interrupt mode */
+} I2C_TRANSFER_OPT_Type;
+
 void I2C0_Init(void);
-void I2C_SendStart(LPC_I2C_TypeDef *);
-void I2C_SendStop(LPC_I2C_TypeDef *);
-void I2C_SendACK(LPC_I2C_TypeDef *);
-void I2C_SendNACK(LPC_I2C_TypeDef *);
-void I2C_ClearStart(LPC_I2C_TypeDef *);
-void I2C_ClearStop(LPC_I2C_TypeDef *);
-void I2C_ClearSI(LPC_I2C_TypeDef *);
-void I2C_WaitForSI(LPC_I2C_TypeDef *);
-int I2C_CheckForSI(LPC_I2C_TypeDef *);
-void I2C_Write(LPC_I2C_TypeDef *, uint8_t);
-uint8_t I2C_Read(LPC_I2C_TypeDef *);
-uint8_t I2C_ReadStatus(LPC_I2C_TypeDef *);
-static void I2C_Stop (LPC_I2C_TypeDef *);
-void I2C_MasterTransferData(LPC_I2C_TypeDef *, I2C_M_SETUP_Type *);
+void I2C_Cmd(LPC_I2C_TypeDef *, FunctionalState);
+Status I2C_MasterTransferData(LPC_I2C_TypeDef *, I2C_M_SETUP_Type *, I2C_TRANSFER_OPT_Type);
 void I2C_IntCmd(LPC_I2C_TypeDef *, uint8_t);
-static int8_t I2C_getNum(LPC_I2C_TypeDef *);
 void I2C_MasterHandler(LPC_I2C_TypeDef  *);
 void I2C0_IRQHandler(void);
 

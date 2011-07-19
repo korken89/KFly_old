@@ -51,8 +51,8 @@ void prvSetupHardware( void )
 	Timer2_Init();
 	SystemInit();
 	__enable_irq();
-	BMA180_Init(BW_150HZ, RANGE_2G);
-	ITG3200_Init();
+	//BMA180_Init(BW_150HZ, RANGE_2G);
+	//ITG3200_Init();
 }
 
 void vTask1(void *pvParameters)
@@ -90,7 +90,7 @@ void vTaskControlLoop(void *pvParameters)
 	while (1)
 	{
 		//ReadAccAngle(acc_tmp);
-		ReadGyroRate(gyro_tmp);
+		//ReadGyroRate(gyro_tmp);
 		
 		/*UpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
 		UpdKalman(&data_yz, acc_tmp[1], gyro_tmp[1]);

@@ -1,5 +1,12 @@
 #include "i2c.h"
 
+/* Private functions */
+static uint32_t I2C_Start(LPC_I2C_TypeDef *);
+static void I2C_Stop(LPC_I2C_TypeDef *);
+static int8_t I2C_getNum(LPC_I2C_TypeDef *);
+static uint32_t I2C_SendByte (LPC_I2C_TypeDef *, uint8_t);
+static uint32_t I2C_GetByte (LPC_I2C_TypeDef *, uint8_t *, Bool);
+
 /* Private struct */
 typedef struct
 {
@@ -22,102 +29,324 @@ void I2C0_Init(void)
 	LPC_I2C0->I2SCLL = 125;
 	
 	LPC_I2C0->I2CONCLR = (1<<AA)|(1<<STA)|(1<<I2EN);	// Clear I2C controll bits
-	LPC_I2C0->I2CONSET = (1<<I2EN);						// Enable I2C0	
+	I2C_Cmd(LPC_I2C0, ENABLE);							// Enable I2C0	
 }
 
-void I2C_SendStart(LPC_I2C_TypeDef *I2Cx)
+/***********************************************************************
+ * Function: I2C_Start
+ * Purpose: Generate a start condition on I2C bus (in master mode only)
+ * Parameters:
+ *     I2Cx: Pointer to I2C register
+ * Returns: value of I2C status register after generate a start condition
+ **********************************************************************/
+static uint32_t I2C_Start(LPC_I2C_TypeDef *I2Cx)
 {
-	I2Cx->I2CONSET = (1<<STA);
+	I2Cx->I2CONCLR = I2C_I2CONCLR_SIC;
+	I2Cx->I2CONSET = I2C_I2CONSET_STA;
+
+	// Wait for complete
+	while (!(I2Cx->I2CONSET & I2C_I2CONSET_SI));
+	I2Cx->I2CONCLR = I2C_I2CONCLR_STAC;
+	return (I2Cx->I2STAT & I2C_STAT_CODE_BITMASK);
 }
 
-void I2C_SendStop(LPC_I2C_TypeDef *I2Cx)
-{
-	I2Cx->I2CONSET = (1<<STO);
-}
-
-void I2C_SendACK(LPC_I2C_TypeDef *I2Cx)
-{
-	I2Cx->I2CONSET = (1<<AA);
-}
-
-void I2C_SendNACK(LPC_I2C_TypeDef *I2Cx)
-{
-	I2Cx->I2CONCLR = (1<<AA);
-}
-
-void I2C_ClearStart(LPC_I2C_TypeDef *I2Cx)
-{
-	I2Cx->I2CONCLR = (1<<STA);
-}
-
-void I2C_ClearStop(LPC_I2C_TypeDef *I2Cx)
-{
-	I2Cx->I2CONCLR = (1<<STO);
-}
-
-void I2C_ClearSI(LPC_I2C_TypeDef *I2Cx)
-{
-	I2Cx->I2CONCLR = (1<<SI);
-}
-
-void I2C_WaitForSI(LPC_I2C_TypeDef *I2Cx)
-{
-	while (!(I2Cx->I2CONSET & (1<<SI)));
-}
-
-int I2C_CheckForSI(LPC_I2C_TypeDef *I2Cx)
-{
-	return (I2Cx->I2CONSET & (1<<SI));
-}
-
-void I2C_Write(LPC_I2C_TypeDef *I2Cx, uint8_t data)
-{
-	I2Cx->I2DAT = data;
-}
-
-uint8_t I2C_Read(LPC_I2C_TypeDef *I2Cx)
-{
-	return (uint8_t)(I2Cx->I2DAT & 0xFF);
-}
-
-uint8_t I2C_ReadStatus(LPC_I2C_TypeDef *I2Cx)
-{
-	return (uint8_t)(I2Cx->I2STAT & 0xFF);
-}
-
-static void I2C_Stop (LPC_I2C_TypeDef *I2Cx)
+/***********************************************************************
+ * Function: I2C_Stop
+ * Purpose: Generate a stop condition on I2C bus (in master mode only)
+ * Parameters:
+ *     I2Cx: Pointer to I2C register
+ * Returns: None
+ **********************************************************************/
+static void I2C_Stop(LPC_I2C_TypeDef *I2Cx)
 {
 	/* Make sure start bit is not active */
 	if (I2Cx->I2CONSET & I2C_I2CONSET_STA)
-	{
 		I2Cx->I2CONCLR = I2C_I2CONCLR_STAC;
-	}
+	
 	I2Cx->I2CONSET = I2C_I2CONSET_STO;
 	I2Cx->I2CONCLR = I2C_I2CONCLR_SIC;
 }
 
-void I2C_MasterTransferData(LPC_I2C_TypeDef *I2Cx, I2C_M_SETUP_Type *TransferCfg)
+/***********************************************************************
+ * Function: I2C_SendByte
+ * Purpose: Send a byte
+ * Parameters:
+ *     I2Cx: Pointer to I2C register
+ * Returns: value of I2C status register after sending
+ **********************************************************************/
+static uint32_t I2C_SendByte (LPC_I2C_TypeDef *I2Cx, uint8_t databyte)
 {
+	/* Make sure start bit is not active */
+	if (I2Cx->I2CONSET & I2C_I2CONSET_STA)
+		I2Cx->I2CONCLR = I2C_I2CONCLR_STAC;
+	
+	I2Cx->I2DAT = databyte & I2C_I2DAT_BITMASK;
+	I2Cx->I2CONCLR = I2C_I2CONCLR_SIC;
+
+	while (!(I2Cx->I2CONSET & I2C_I2CONSET_SI));
+	return (I2Cx->I2STAT & I2C_STAT_CODE_BITMASK);
+}
+
+/***********************************************************************
+ * Function: I2C_GetByte
+ * Purpose: Get a byte
+ * Parameters:
+ *     I2Cx: Pointer to I2C register
+ * Returns: value of I2C status register after receiving
+ **********************************************************************/
+static uint32_t I2C_GetByte (LPC_I2C_TypeDef *I2Cx, uint8_t *retdat, Bool ack)
+{
+	if (ack == TRUE)
+		I2Cx->I2CONSET = I2C_I2CONSET_AA;
+	else
+		I2Cx->I2CONCLR = I2C_I2CONCLR_AAC;
+	
+	I2Cx->I2CONCLR = I2C_I2CONCLR_SIC;
+
+	while (!(I2Cx->I2CONSET & I2C_I2CONSET_SI));
+	*retdat = (uint8_t) (I2Cx->I2DAT & I2C_I2DAT_BITMASK);
+	return (I2Cx->I2STAT & I2C_STAT_CODE_BITMASK);
+}
+
+/***********************************************************************
+ * @brief		Enable or disable I2C peripheral's operation
+ * @param[in]	I2Cx I2C peripheral selected, should be I2C0, I2C1 or I2C2
+ * @param[in]	NewState New State of I2Cx peripheral's operation
+ * @return 		none
+ **********************************************************************/
+void I2C_Cmd(LPC_I2C_TypeDef *I2Cx, FunctionalState NewState)
+{
+	if (NewState == ENABLE)
+		I2Cx->I2CONSET = I2C_I2CONSET_I2EN;
+	else
+		I2Cx->I2CONCLR = I2C_I2CONCLR_I2ENC;
+}
+
+/***********************************************************************
+ * @brief 		Transmit and Receive data in master mode
+ * @param[in]	TransferCfg		Pointer to a I2C_M_SETUP_Type structure that
+ * 								contains specified information about the
+ * 								configuration for master transfer.
+ * @param[in]	Opt				a I2C_TRANSFER_OPT_Type type that selected for
+ * 								interrupt or polling mode.
+ * @return 		SUCCESS or ERROR
+ *
+ * Note:
+ * - In case of using I2C to transmit data only, either transmit length set to 0
+ * or transmit data pointer set to NULL.
+ * - In case of using I2C to receive data only, either receive length set to 0
+ * or receive data pointer set to NULL.
+ * - In case of using I2C to transmit followed by receive data, transmit length,
+ * transmit data pointer, receive length and receive data pointer should be set
+ * corresponding.
+ **********************************************************************/
+Status I2C_MasterTransferData(LPC_I2C_TypeDef *I2Cx, I2C_M_SETUP_Type *TransferCfg, I2C_TRANSFER_OPT_Type Opt)
+{
+	uint8_t *txdat;
+	uint8_t *rxdat;
+	uint32_t CodeStatus;
 	uint8_t tmp;
 
+	// reset all default state
+	txdat = (uint8_t *) TransferCfg->tx_data;
+	rxdat = (uint8_t *) TransferCfg->rx_data;
 	// Reset I2C setup value to default state
 	TransferCfg->tx_count = 0;
 	TransferCfg->rx_count = 0;
 	TransferCfg->status = 0;
 
-	// Setup tx_rx data, callback and interrupt handler
-	tmp = I2C_getNum(I2Cx);
-	i2cdat[tmp].txrx_setup = (uint32_t) TransferCfg;
-	i2cdat[tmp].inthandler = I2C_MasterHandler;
-	// Set direction phase, write first
-	i2cdat[tmp].dir = 0;
+	if (Opt == I2C_TRANSFER_POLLING)
+	{
+		/* First Start condition -------------------------------------------------------------- */
+		TransferCfg->retransmissions_count = 0;
+retry:
+		// reset all default state
+		txdat = (uint8_t *) TransferCfg->tx_data;
+		rxdat = (uint8_t *) TransferCfg->rx_data;
+		// Reset I2C setup value to default state
+		TransferCfg->tx_count = 0;
+		TransferCfg->rx_count = 0;
+		CodeStatus = 0;
 
-	/* First Start condition */
-	I2Cx->I2CONCLR = (1<<SI);
-	I2Cx->I2CONSET = (1<<STA);
-	I2C_IntCmd(I2Cx, 1);
+		// Start command
+		CodeStatus = I2C_Start(I2Cx);
+		if ((CodeStatus != I2C_I2STAT_M_TX_START) && (CodeStatus != I2C_I2STAT_M_TX_RESTART))
+		{
+			TransferCfg->retransmissions_count++;
+			if (TransferCfg->retransmissions_count > TransferCfg->retransmissions_max)
+			{
+				// save status
+				TransferCfg->status = CodeStatus;
+				goto error;
+			}
+			else
+				goto retry;
+		}
+
+		/* In case of sending data first --------------------------------------------------- */
+		if ((TransferCfg->tx_length != 0) && (TransferCfg->tx_data != NULL))
+		{
+			/* Send slave address + WR direction bit = 0 ----------------------------------- */
+			CodeStatus = I2C_SendByte(I2Cx, (TransferCfg->sl_addr7bit << 1));
+			if (CodeStatus != I2C_I2STAT_M_TX_SLAW_ACK)
+			{
+				TransferCfg->retransmissions_count++;
+				if (TransferCfg->retransmissions_count > TransferCfg->retransmissions_max)
+				{
+					// save status
+					TransferCfg->status = CodeStatus | I2C_SETUP_STATUS_NOACKF;
+					goto error;
+				}
+				else
+					goto retry;
+			}
+
+			/* Send a number of data bytes ---------------------------------------- */
+			while (TransferCfg->tx_count < TransferCfg->tx_length)
+			{
+				CodeStatus = I2C_SendByte(I2Cx, *txdat);
+				if (CodeStatus != I2C_I2STAT_M_TX_DAT_ACK)
+				{
+					TransferCfg->retransmissions_count++;
+					if (TransferCfg->retransmissions_count > TransferCfg->retransmissions_max)
+					{
+						// save status
+						TransferCfg->status = CodeStatus | I2C_SETUP_STATUS_NOACKF;
+						goto error;
+					}
+					else
+						goto retry;
+				}
+
+				txdat++;
+				TransferCfg->tx_count++;
+			}
+		}
+
+		/* Second Start condition (Repeat Start) ------------------------------------------- */
+		if ((TransferCfg->tx_length != 0) && (TransferCfg->tx_data != NULL) \
+				&& (TransferCfg->rx_length != 0) && (TransferCfg->rx_data != NULL))
+		{
+
+			CodeStatus = I2C_Start(I2Cx);
+			if ((CodeStatus != I2C_I2STAT_M_RX_START) && (CodeStatus != I2C_I2STAT_M_RX_RESTART))
+			{
+				TransferCfg->retransmissions_count++;
+				if (TransferCfg->retransmissions_count > TransferCfg->retransmissions_max)
+				{
+					// Update status
+					TransferCfg->status = CodeStatus;
+					goto error;
+				}
+				else
+					goto retry;
+			}
+		}
+
+		/* Then, start reading after sending data -------------------------------------- */
+		if ((TransferCfg->rx_length != 0) && (TransferCfg->rx_data != NULL))
+		{
+			/* Send slave address + RD direction bit = 1 ----------------------------------- */
+			CodeStatus = I2C_SendByte(I2Cx, ((TransferCfg->sl_addr7bit << 1) | 0x01));
+			if (CodeStatus != I2C_I2STAT_M_RX_SLAR_ACK)
+			{
+				TransferCfg->retransmissions_count++;
+				if (TransferCfg->retransmissions_count > TransferCfg->retransmissions_max)
+				{
+					// update status
+					TransferCfg->status = CodeStatus | I2C_SETUP_STATUS_NOACKF;
+					goto error;
+				}
+				else
+					goto retry;
+			}
+
+			/* Receive a number of data bytes ------------------------------------------------- */
+			while (TransferCfg->rx_count < TransferCfg->rx_length)
+			{
+				/*
+				 * Note that: if data length is only one, the master should not
+				 * issue an ACK signal on bus after reading to avoid of next data frame
+				 * on slave side
+				 */
+				if (TransferCfg->rx_count < (TransferCfg->rx_length - 1))
+				{
+					// Issue an ACK signal for next data frame
+					CodeStatus = I2C_GetByte(I2Cx, &tmp, 1);
+					if (CodeStatus != I2C_I2STAT_M_RX_DAT_ACK)
+					{
+						TransferCfg->retransmissions_count++;
+						if (TransferCfg->retransmissions_count > TransferCfg->retransmissions_max)
+						{
+							// update status
+							TransferCfg->status = CodeStatus;
+							goto error;
+						}
+						else
+							goto retry;
+					}
+				}
+				else
+				{
+					// Do not issue an ACK signal
+					CodeStatus = I2C_GetByte(I2Cx, &tmp, 0);
+					if (CodeStatus != I2C_I2STAT_M_RX_DAT_NACK)
+					{
+						TransferCfg->retransmissions_count++;
+						if (TransferCfg->retransmissions_count > TransferCfg->retransmissions_max)
+						{
+							// update status
+							TransferCfg->status = CodeStatus;
+							goto error;
+						}
+						else
+							goto retry;
+					}
+				}
+				*rxdat++ = tmp;
+				TransferCfg->rx_count++;
+			}
+		}
+
+		/* Send STOP condition ------------------------------------------------- */
+		I2C_Stop(I2Cx);
+		return SUCCESS;
+
+error:
+		// Send stop condition
+		I2C_Stop(I2Cx);
+		return ERROR;
+	}
+
+	else if (Opt == I2C_TRANSFER_INTERRUPT)
+	{
+		// Setup tx_rx data, callback and interrupt handler
+		tmp = I2C_getNum(I2Cx);
+		i2cdat[tmp].txrx_setup = (uint32_t) TransferCfg;
+		i2cdat[tmp].inthandler = I2C_MasterHandler;
+		// Set direction phase, write first
+		i2cdat[tmp].dir = 0;
+
+		/* First Start condition -------------------------------------------------------------- */
+		I2Cx->I2CONCLR = I2C_I2CONCLR_SIC;
+		I2Cx->I2CONSET = I2C_I2CONSET_STA;
+		I2C_IntCmd(I2Cx, 1);
+
+		return SUCCESS;
+	}
+
+	return ERROR;
 }
 
+/***********************************************************************
+ * @brief 		Enable/Disable interrupt for I2C peripheral
+ * @param[in]	I2Cx	I2C peripheral selected, should be I2C0, I2C1 or I2C2
+ * @param[in]	NewState	New State of I2C peripheral interrupt in NVIC core
+ * 							should be:
+ * 							- ENABLE: enable interrupt for this I2C peripheral
+ * 							- DISABLE: disable interrupt for this I2C peripheral
+ * @return 		None
+ **********************************************************************/
 void I2C_IntCmd(LPC_I2C_TypeDef *I2Cx, uint8_t NewState)
 {
 	if (NewState)
@@ -144,6 +373,11 @@ void I2C_IntCmd(LPC_I2C_TypeDef *I2Cx, uint8_t NewState)
 	}
 }
 
+/***********************************************************************
+ * @brief 		Convert I2C peripheral to number
+ * @param[in]	I2Cx	I2C peripheral selected, should be I2C0, I2C1 or I2C2
+ * @return 		I2C0 returns 0 ... I2C2 returns 2
+ **********************************************************************/
 static int8_t I2C_getNum(LPC_I2C_TypeDef *I2Cx)
 {
 	if (I2Cx == LPC_I2C0)
@@ -158,6 +392,11 @@ static int8_t I2C_getNum(LPC_I2C_TypeDef *I2Cx)
 	return (-1);
 }
 
+/***********************************************************************
+ * @brief 		General Master Interrupt handler for I2C peripheral
+ * @param[in]	I2Cx	I2C peripheral selected, should be LPC_I2C0, LPC_I2C1 or LPC_I2C2
+ * @return 		None
+ **********************************************************************/
 void I2C_MasterHandler(LPC_I2C_TypeDef  *I2Cx)
 {
 	int32_t tmp;
@@ -380,4 +619,5 @@ end_stage:
 
 void I2C0_IRQHandler(void)
 {
+	i2cdat[0].inthandler(LPC_I2C0);
 }
