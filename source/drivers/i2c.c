@@ -33,11 +33,9 @@ void I2C0_Init(void)
 }
 
 /***********************************************************************
- * Function: I2C_Start
- * Purpose: Generate a start condition on I2C bus (in master mode only)
- * Parameters:
- *     I2Cx: Pointer to I2C register
- * Returns: value of I2C status register after generate a start condition
+ * @brief		Generate a start condition on I2C bus (in master mode only)
+ * @param[in]	I2Cx I2C peripheral selected, should be I2C0, I2C1 or I2C2
+ * @return 		I2Cx statuscode
  **********************************************************************/
 static uint32_t I2C_Start(LPC_I2C_TypeDef *I2Cx)
 {
@@ -51,11 +49,9 @@ static uint32_t I2C_Start(LPC_I2C_TypeDef *I2Cx)
 }
 
 /***********************************************************************
- * Function: I2C_Stop
- * Purpose: Generate a stop condition on I2C bus (in master mode only)
- * Parameters:
- *     I2Cx: Pointer to I2C register
- * Returns: None
+ * @brief		Generate a stop condition on I2C bus (in master mode only)
+ * @param[in]	I2Cx I2C peripheral selected, should be I2C0, I2C1 or I2C2
+ * @return 		None
  **********************************************************************/
 static void I2C_Stop(LPC_I2C_TypeDef *I2Cx)
 {
@@ -68,11 +64,10 @@ static void I2C_Stop(LPC_I2C_TypeDef *I2Cx)
 }
 
 /***********************************************************************
- * Function: I2C_SendByte
- * Purpose: Send a byte
- * Parameters:
- *     I2Cx: Pointer to I2C register
- * Returns: value of I2C status register after sending
+ * @brief		Send a byte to the I2C
+ * @param[in]	I2Cx I2C peripheral selected, should be I2C0, I2C1 or I2C2
+ * @param[in]	Databyte to be sent
+ * @return 		I2Cx statuscode
  **********************************************************************/
 static uint32_t I2C_SendByte (LPC_I2C_TypeDef *I2Cx, uint8_t databyte)
 {
@@ -88,11 +83,11 @@ static uint32_t I2C_SendByte (LPC_I2C_TypeDef *I2Cx, uint8_t databyte)
 }
 
 /***********************************************************************
- * Function: I2C_GetByte
- * Purpose: Get a byte
- * Parameters:
- *     I2Cx: Pointer to I2C register
- * Returns: value of I2C status register after receiving
+ * @brief		Get a byte from the I2C
+ * @param[in]	I2Cx I2C peripheral selected, should be I2C0, I2C1 or I2C2
+ * @param[in]	retdat is the storage buffer
+ * @param[in]	ack to TRUE will generate an ACK, FALSE will generate a NACK
+ * @return 		I2Cx statuscode
  **********************************************************************/
 static uint32_t I2C_GetByte (LPC_I2C_TypeDef *I2Cx, uint8_t *retdat, Bool ack)
 {
@@ -347,7 +342,7 @@ error:
  * 							- DISABLE: disable interrupt for this I2C peripheral
  * @return 		None
  **********************************************************************/
-void I2C_IntCmd(LPC_I2C_TypeDef *I2Cx, uint8_t NewState)
+void I2C_IntCmd(LPC_I2C_TypeDef *I2Cx, FunctionalState NewState)
 {
 	if (NewState)
 	{
@@ -451,16 +446,16 @@ void I2C_MasterHandler(LPC_I2C_TypeDef  *I2Cx)
 				txrx_setup->tx_count++;
 				I2Cx->I2CONCLR = I2C_I2CONCLR_SIC;
 			}
-			// no more data, switch to next stage
+			// No more data, switch to next stage
 			else
 			{
 next_stage:
-				// change direction
+				// Change direction
 				i2cdat[tmp].dir = 1;
 				// Check if any data to receive
 				if ((txrx_setup->rx_length != 0) && (txrx_setup->rx_data != NULL))
 				{
-						// check whether if we need to issue an repeat start
+						// Check whether if we need to issue an repeat start
 						if ((txrx_setup->tx_length != 0) && (txrx_setup->tx_data != NULL))
 						{
 							// Send out an repeat start command
@@ -471,10 +466,10 @@ next_stage:
 						else
 							goto send_slar;
 				}
-				// no more data send, the go to end stage now
+				// No more data send, the go to end stage now
 				else
 				{
-					// success, goto end stage
+					// Success, goto end stage
 					txrx_setup->status |= I2C_SETUP_STATUS_DONE;
 					goto end_stage;
 				}
@@ -485,13 +480,13 @@ next_stage:
 		case I2C_I2STAT_M_TX_SLAW_NACK:
 		/* Data has been transmitted, NACK has been received -----------------------*/
 		case I2C_I2STAT_M_TX_DAT_NACK:
-			// update status
+			// Update status
 			txrx_setup->status |= I2C_SETUP_STATUS_NOACKF;
 			goto retry;
 			break;
 		/* Arbitration lost in SLA+R/W or Data bytes -------------------------------*/
 		case I2C_I2STAT_M_TX_ARB_LOST:
-			// update status
+			// Update status
 			txrx_setup->status |= I2C_SETUP_STATUS_ARBF;
 		default:
 			goto retry;
@@ -573,25 +568,25 @@ send_slar:
 				*(uint8_t *)(txrx_setup->rx_data + txrx_setup->rx_count) = (I2Cx->I2DAT & I2C_I2DAT_BITMASK);
 				txrx_setup->rx_count++;
 			}
-			// success, go to end stage
+			// Success, go to end stage
 			txrx_setup->status |= I2C_SETUP_STATUS_DONE;
 			goto end_stage;
 			break;
 
 		/* SLA+R has been transmitted, NACK has been received ------------------*/
 		case I2C_I2STAT_M_RX_SLAR_NACK:
-			// update status
+			// Update status
 			txrx_setup->status |= I2C_SETUP_STATUS_NOACKF;
 			goto retry;
 			break;
 
 		/* Arbitration lost ----------------------------------------------------*/
 		case I2C_I2STAT_M_RX_ARB_LOST:
-			// update status
+			// Update status
 			txrx_setup->status |= I2C_SETUP_STATUS_ARBF;
 		default:
 retry:
-			// check if retransmission is available
+			// Check if retransmission is available
 			if (txrx_setup->retransmissions_count < txrx_setup->retransmissions_max)
 			{
 				// Clear tx count

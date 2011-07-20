@@ -68,32 +68,25 @@
 #define I2C_SETUP_STATUS_NOACKF (1<<9)	/**< No ACK returned */
 #define I2C_SETUP_STATUS_DONE   (1<<10)	/**< Status DONE */
 
-/** SET and CLR bits */
-#define AA				2
-#define SI				3
-#define STO				4
-#define STA				5
-#define I2EN			6
-
 /** Master transfer setup data structure definitions */
 typedef struct
 {
-  uint32_t          sl_addr7bit;				/**< Slave address in 7bit mode */
-  uint8_t*          tx_data;					/**< Pointer to Transmit data - NULL if data transmit
-													  is not used */
-  uint32_t          tx_length;					/**< Transmit data length - 0 if data transmit
-													  is not used*/
-  uint32_t          tx_count;					/**< Current Transmit data counter */
-  uint8_t*          rx_data;					/**< Pointer to Receive data - NULL if data receive
-													  is not used */
-  uint32_t          rx_length;					/**< Receive data length - 0 if data receive is
-													   not used */
-  uint32_t          rx_count;					/**< Current Receive data counter */
-  uint32_t          retransmissions_max;		/**< Max Re-Transmission value */
-  uint32_t          retransmissions_count;		/**< Current Re-Transmission counter */
-  uint32_t          status;						/**< Current status of I2C activity */
-  void 				(*callback)(void);			/**< Pointer to Call back function when transmission complete
-													used in interrupt transfer mode */
+	uint32_t          sl_addr7bit;				/**< Slave address in 7bit mode */
+	uint8_t*          tx_data;					/**< Pointer to Transmit data - NULL if data transmit
+													 is not used */
+	uint32_t          tx_length;				/**< Transmit data length - 0 if data transmit
+													 is not used*/
+	uint32_t          tx_count;					/**< Current Transmit data counter */
+	uint8_t*          rx_data;					/**< Pointer to Receive data - NULL if data receive
+													 is not used */
+	uint32_t          rx_length;				/**< Receive data length - 0 if data receive is
+													 not used */
+	uint32_t          rx_count;					/**< Current Receive data counter */
+	uint32_t          retransmissions_max;		/**< Max Re-Transmission value */
+	uint32_t          retransmissions_count;	/**< Current Re-Transmission counter */
+	uint32_t          status;					/**< Current status of I2C activity */
+	void 				(*callback)(void);		/**< Pointer to Call back function when transmission complete
+													 used in interrupt transfer mode */
 } I2C_M_SETUP_Type;
 
 typedef enum {
@@ -104,7 +97,7 @@ typedef enum {
 void I2C0_Init(void);
 void I2C_Cmd(LPC_I2C_TypeDef *, FunctionalState);
 Status I2C_MasterTransferData(LPC_I2C_TypeDef *, I2C_M_SETUP_Type *, I2C_TRANSFER_OPT_Type);
-void I2C_IntCmd(LPC_I2C_TypeDef *, uint8_t);
+void I2C_IntCmd(LPC_I2C_TypeDef *, FunctionalState);
 void I2C_MasterHandler(LPC_I2C_TypeDef  *);
 void I2C0_IRQHandler(void);
 
