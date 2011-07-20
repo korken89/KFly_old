@@ -7,7 +7,7 @@
 void ReadAcc(float *data)
 {
 	int16_t temp[3];
-	BMA180_BurstRead(temp);
+	//BMA180_BurstRead(temp);
 	
 	// X-axis
 	#if configFLIP_ACC_X == 0
@@ -38,7 +38,7 @@ void ReadAcc(float *data)
 void ReadGyroRate(float *data)
 {
 	int16_t temp[3];
-	ITG3200_BurstRead(temp);
+	//ITG3200_BurstRead(temp);
 	
 	// X-axis
 	#if configFLIP_GYRO_X == 0
@@ -73,7 +73,7 @@ void ReadGyroRate(float *data)
 void ReadAccAngle(float *data)
 {
 	float temp[3];
-	ReadAcc(temp);
+	//ReadAcc(temp);
 		
 	float zsq = temp[2]*temp[2];
 	float xz = fInvSqrt(temp[0]*temp[0]+zsq);

@@ -4,8 +4,9 @@
 #include "i2c.h"
 
 // ITG3200 Register Defines
-#define ITG3200_R 	0b11010001		// ADD pin is pulled low
-#define ITG3200_W 	0b11010000
+#define ITG3200_R 		0b11010001		// ADD pin is pulled low
+#define ITG3200_W 		0b11010000
+#define ITG3200_ADDR	0b01101000
 
 
 #define ACTL				0
@@ -42,7 +43,7 @@ struct gyro_data {
 
 void ITG3200_Init(void);
 void ITG3200_BurstRead(int16_t *);
-uint8_t ITG3200_Read(uint8_t address);
-void ITG3200_Write(uint8_t address, uint8_t data);
+uint8_t ITG3200_Read(uint8_t);
+void ITG3200_Write(uint8_t, uint8_t);
 
 #endif
