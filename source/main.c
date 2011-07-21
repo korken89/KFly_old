@@ -52,7 +52,7 @@ void prvSetupHardware( void )
 	SystemInit();
 	__enable_irq();
 	//BMA180_Init(BW_150HZ, RANGE_2G);
-	//ITG3200_Init();
+	ITG3200_Init();
 }
 
 void vTask1(void *pvParameters)

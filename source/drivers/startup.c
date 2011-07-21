@@ -57,7 +57,7 @@ __attribute__((section(".vectors"))) void* vectors[] = {
 	0, //UART2_IRQHandler,		/* UART2 */
 	0, //UART3_IRQHandler,		/* UART3 */
 	0, //PWM1_IRQHandler,		/* PWM1 */
-	0, //I2C0_IRQHandler,		/* I2C0 */
+	I2C0_IRQHandler,			/* I2C0 */
 	0, //I2C1_IRQHandler,		/* I2C1 */
 	0, //I2C2_IRQHandler,		/* I2C2 */
 	0, //SPI_IRQHandler,		/* SPI */

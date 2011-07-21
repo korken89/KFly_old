@@ -30,16 +30,9 @@ void SystemInit(void)
 	LPC_SC->PLL0FEED  = 0x55;					// Feed sequence
 	
 	LPC_SC->FLASHCFG  = FLASHCFG_Val;
-	
-	/** Lite osäker vart jag hittade den här koden, med det var på NXPs hemsida någon stanns */
+
 	SystemFrequency = 	(OSC_CLK *
                         (((2 * ((LPC_SC->PLL0STAT & 0x7FFF) + 1))) /
                         (((LPC_SC->PLL0STAT >> 16) & 0xFF) + 1))   /
                         ((LPC_SC->CCLKCFG & 0xFF)+ 1));
-                        
-	__asm__ volatile("nop");
-	__asm__ volatile("nop");
-	__asm__ volatile("nop");
-	__asm__ volatile("nop");
-	__asm__ volatile("nop");
 }

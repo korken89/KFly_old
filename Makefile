@@ -12,7 +12,7 @@ LDFLAGS = $(COMMON) -T link.ld -Wl,--build-id=none
 
 # Driver source files
 SRCC =  $(DDIR)syscalls.c $(DDIR)startup.c $(DDIR)system_LPC17xx.c $(DDIR)leds.c  $(DDIR)timer.c $(DDIR)extint.c
-SRCC += $(DDIR)uart.c $(DDIR)pwm.c $(DDIR)gps.c $(DDIR)i2c.c
+SRCC += $(DDIR)uart.c $(DDIR)pwm.c $(DDIR)gps.c $(DDIR)i2c.c $(DDIR)itg3200.c
 
 # RTOS source files
 SRCC +=	$(RTOS_DIR)list.c $(RTOS_DIR)tasks.c $(RTOS_DIR)queue.c $(RTOS_PORT)port.c $(RTOS_MEM)heap_1.c
@@ -22,7 +22,7 @@ SRCC +=	$(DIR)main.c $(DIR)misc.c $(DIR)fmath.c $(DIR)kalman.c $(DIR)pid.c $(DIR
 
 # All object files for linking
 SRCO = 	syscalls.o startup.o system_LPC17xx.o list.o tasks.o queue.o port.o heap_1.o main.o extint.o
-SRCO += misc.o fmath.o leds.o timer.o uart.o pwm.o gps.o kalman.o pid.o i2c.o
+SRCO += misc.o fmath.o leds.o timer.o uart.o pwm.o gps.o kalman.o pid.o i2c.o itg3200.o
 SRCO += input.o
 
 all: clean main.elf

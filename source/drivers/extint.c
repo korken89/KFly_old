@@ -68,6 +68,5 @@ void EINT3_IRQHandler (void)
 		}
 		else if ((Ticks - nocon[i]) > 200000)
 			sData.ch[i] = 0;
-			
 	}
 }

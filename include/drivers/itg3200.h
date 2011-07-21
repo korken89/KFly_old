@@ -4,10 +4,9 @@
 #include "i2c.h"
 
 // ITG3200 Register Defines
-#define ITG3200_R 		0b11010001		// ADD pin is pulled low
-#define ITG3200_W 		0b11010000
-#define ITG3200_ADDR	0b01101000
-
+#define ITG3200_R 			0b11010001		// ADD pin is pulled low
+#define ITG3200_W 			0b11010000
+#define ITG3200_ADDR		0b01101000
 
 #define ACTL				0
 #define OPEN				0

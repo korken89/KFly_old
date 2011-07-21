@@ -18,8 +18,8 @@ void I2C0_Init(void)
 	LPC_SC->PCONP |= (1<<PCI2C0);						// Setup power to I2C0
 	LPC_SC->PCLKSEL0 |= (1<<PCLK_I2C0);					// PCLK = 100MHz
 	
-	LPC_I2C0->I2SCLH = 125;								// PCLK/(125+125) = 400kHz
-	LPC_I2C0->I2SCLL = 125;
+	LPC_I2C0->I2SCLH = 250;								// PCLK/(125+125) = 400kHz
+	LPC_I2C0->I2SCLL = 250;
 	
 	LPC_I2C0->I2CONCLR = (1<<AA)|(1<<STA)|(1<<I2EN);	// Clear I2C controll bits
 	I2C_Cmd(LPC_I2C0, ENABLE);							// Enable I2C0	
@@ -28,17 +28,18 @@ void I2C0_Init(void)
 /***********************************************************************
  * @brief		Generate a start condition on I2C bus (in master mode only)
  * @param[in]	I2Cx I2C peripheral selected, should be I2C0, I2C1 or I2C2
- * @return 		I2Cx statuscode
+ * @return 		I2Cx status code
  **********************************************************************/
-uint32_t I2C_Start(LPC_I2C_TypeDef *I2Cx)
+uint8_t I2C_Start(LPC_I2C_TypeDef *I2Cx)
 {
+	I2Cx->I2CONCLR = (1<<STA)|(1<<STO);
 	I2Cx->I2CONCLR = I2C_I2CONCLR_SIC;
 	I2Cx->I2CONSET = I2C_I2CONSET_STA;
 
 	// Wait for complete
 	while (!(I2Cx->I2CONSET & I2C_I2CONSET_SI));
 	I2Cx->I2CONCLR = I2C_I2CONCLR_STAC;
-	return (I2Cx->I2STAT & I2C_STAT_CODE_BITMASK);
+	return (uint8_t)(I2Cx->I2STAT & I2C_STAT_CODE_BITMASK);
 }
 
 /***********************************************************************
@@ -60,9 +61,9 @@ void I2C_Stop(LPC_I2C_TypeDef *I2Cx)
  * @brief		Send a byte to the I2C
  * @param[in]	I2Cx I2C peripheral selected, should be I2C0, I2C1 or I2C2
  * @param[in]	Databyte to be sent
- * @return 		I2Cx statuscode
+ * @return 		I2Cx status code
  **********************************************************************/
-uint32_t I2C_SendByte(LPC_I2C_TypeDef *I2Cx, uint8_t databyte)
+uint8_t I2C_SendByte(LPC_I2C_TypeDef *I2Cx, uint8_t databyte)
 {
 	/* Make sure start bit is not active */
 	if (I2Cx->I2CONSET & I2C_I2CONSET_STA)
@@ -72,7 +73,7 @@ uint32_t I2C_SendByte(LPC_I2C_TypeDef *I2Cx, uint8_t databyte)
 	I2Cx->I2CONCLR = I2C_I2CONCLR_SIC;
 
 	while (!(I2Cx->I2CONSET & I2C_I2CONSET_SI));
-	return (I2Cx->I2STAT & I2C_STAT_CODE_BITMASK);
+	return (uint8_t)(I2Cx->I2STAT & I2C_STAT_CODE_BITMASK);
 }
 
 /***********************************************************************
@@ -80,9 +81,9 @@ uint32_t I2C_SendByte(LPC_I2C_TypeDef *I2Cx, uint8_t databyte)
  * @param[in]	I2Cx I2C peripheral selected, should be I2C0, I2C1 or I2C2
  * @param[in]	retdat is the storage buffer
  * @param[in]	ack to TRUE will generate an ACK, FALSE will generate a NACK
- * @return 		I2Cx statuscode
+ * @return 		I2Cx status code
  **********************************************************************/
-uint32_t I2C_GetByte(LPC_I2C_TypeDef *I2Cx, uint8_t *retdat, Bool ack)
+uint8_t I2C_GetByte(LPC_I2C_TypeDef *I2Cx, uint8_t *retdat, Bool ack)
 {
 	if (ack == TRUE)
 		I2Cx->I2CONSET = I2C_I2CONSET_AA;
@@ -93,7 +94,7 @@ uint32_t I2C_GetByte(LPC_I2C_TypeDef *I2Cx, uint8_t *retdat, Bool ack)
 
 	while (!(I2Cx->I2CONSET & I2C_I2CONSET_SI));
 	*retdat = (uint8_t) (I2Cx->I2DAT & I2C_I2DAT_BITMASK);
-	return (I2Cx->I2STAT & I2C_STAT_CODE_BITMASK);
+	return (uint8_t)(I2Cx->I2STAT & I2C_STAT_CODE_BITMASK);
 }
 
 /***********************************************************************
@@ -312,14 +313,14 @@ error:
 		tmp = I2C_getNum(I2Cx);
 		i2cdat[tmp].txrx_setup = (uint32_t) TransferCfg;
 		i2cdat[tmp].inthandler = I2C_MasterHandler;
+		
 		// Set direction phase, write first
 		i2cdat[tmp].dir = 0;
-
 		/* First Start condition -------------------------------------------------------------- */
 		I2Cx->I2CONCLR = I2C_I2CONCLR_SIC;
 		I2Cx->I2CONSET = I2C_I2CONSET_STA;
-		I2C_IntCmd(I2Cx, 1);
-
+		I2C_IntCmd(I2Cx, ENABLE);
+		
 		return SUCCESS;
 	}
 
@@ -337,7 +338,7 @@ error:
  **********************************************************************/
 void I2C_IntCmd(LPC_I2C_TypeDef *I2Cx, FunctionalState NewState)
 {
-	if (NewState)
+	if (NewState == ENABLE)
 	{
 		if(I2Cx == LPC_I2C0)
 			NVIC_EnableIRQ(I2C0_IRQn);
@@ -382,7 +383,7 @@ int8_t I2C_getNum(LPC_I2C_TypeDef *I2Cx)
 
 /***********************************************************************
  * @brief 		General Master Interrupt handler for I2C peripheral
- * @param[in]	I2Cx	I2C peripheral selected, should be LPC_I2C0, LPC_I2C1 or LPC_I2C2
+ * @param[in]	I2Cx	I2C peripheral selected, should be I2C0, I2C1 or I2C2
  * @return 		None
  **********************************************************************/
 void I2C_MasterHandler(LPC_I2C_TypeDef  *I2Cx)
@@ -593,7 +594,7 @@ retry:
 			{
 end_stage:
 				// Disable interrupt
-				I2C_IntCmd(I2Cx, 0);
+				I2C_IntCmd(I2Cx, DISABLE);
 				// Send stop
 				I2C_Stop(I2Cx);
 				// Call callback if installed
