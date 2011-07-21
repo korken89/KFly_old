@@ -106,7 +106,7 @@ void vTaskControlLoop(void *pvParameters)
 		
 		UART0_SendChar('\n');*/
 		
-		vTaskDelayUntil(&xLastWakeTime, 10 / portTICK_RATE_MS);
+		vTaskDelayUntil(&xLastWakeTime, (int)UPDATE_RATE / portTICK_RATE_MS);
 	}
 }
 

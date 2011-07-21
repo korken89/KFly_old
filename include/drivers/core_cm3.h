@@ -1518,6 +1518,19 @@ static __INLINE void NVIC_DisableIRQ(IRQn_Type IRQn)
 }
 
 /**
+ * @brief  Enable Interrupt in NVIC Interrupt Controller
+ *
+ * @param  IRQn   The positive number of the external interrupt to enable
+ *
+ * Enable a device specific interupt in the NVIC interrupt controller.
+ * The interrupt number cannot be a negative value.
+ */
+static __INLINE uint32_t NVIC_GetEnableIRQ(IRQn_Type IRQn)
+{
+  return (NVIC->ISER[((uint32_t)(IRQn) >> 5)] & (1 << ((uint32_t)(IRQn) & 0x1F))); /* enable interrupt */
+}
+
+/**
  * @brief  Read the interrupt pending bit for a device specific interrupt source
  * 
  * @param  IRQn    The number of the device specifc interrupt

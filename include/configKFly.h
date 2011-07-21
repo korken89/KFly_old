@@ -9,3 +9,6 @@
 
 // Maximum angular rate of the aircraft in acrobatic mode (in deg/s)
 #define MAX_RATE		180.0f	// 180 deg/s max
+
+// Update rate for all regulators and filters in Hz
+#define UPDATE_RATE 	10.0f

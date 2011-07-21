@@ -1,7 +1,8 @@
 #ifndef _KALMAN_H
 #define _KALMAN_H
 
-#define UPDATE_RATE 10.0f			// 100Hz
+#include "configKFly.h"
+
 #define DT 			1.0f/UPDATE_RATE 
 // Q diagonal 3x3 with these elements on diagonal
 #define Q1 			5.0f

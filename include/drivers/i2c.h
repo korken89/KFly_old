@@ -102,11 +102,7 @@ typedef enum {
 } I2C_TRANSFER_OPT_Type;
 
 void I2C0_Init(void);
-uint8_t I2C_Start(LPC_I2C_TypeDef *);
-void I2C_Stop(LPC_I2C_TypeDef *);
 int8_t I2C_getNum(LPC_I2C_TypeDef *);
-uint8_t I2C_SendByte(LPC_I2C_TypeDef *, uint8_t);
-uint8_t I2C_GetByte(LPC_I2C_TypeDef *, uint8_t *, Bool);
 void I2C_Cmd(LPC_I2C_TypeDef *, FunctionalState);
 Status I2C_MasterTransferData(LPC_I2C_TypeDef *, I2C_M_SETUP_Type *, I2C_TRANSFER_OPT_Type);
 void I2C_IntCmd(LPC_I2C_TypeDef *, FunctionalState);

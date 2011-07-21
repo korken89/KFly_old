@@ -2,6 +2,8 @@
 #define ITG3200_H_
 
 #include "i2c.h"
+#include "lpc_types.h"
+#include "uart.h"
 
 // ITG3200 Register Defines
 #define ITG3200_R 			0b11010001		// ADD pin is pulled low
@@ -40,7 +42,7 @@ struct gyro_data {
 	int16_t z;
 };
 
-void ITG3200_Init(void);
+Status ITG3200_Init(void);
 void ITG3200_BurstRead(int16_t *);
 uint8_t ITG3200_Read(uint8_t);
 void ITG3200_Write(uint8_t, uint8_t);

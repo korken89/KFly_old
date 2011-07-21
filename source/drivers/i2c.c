@@ -8,6 +8,12 @@ typedef struct
   void		(*inthandler)(LPC_I2C_TypeDef *I2Cx);	/* Transmission interrupt handler */
 } I2C_CFG_T;
 
+/* Private functions */
+static uint8_t I2C_Start(LPC_I2C_TypeDef *);
+static void I2C_Stop(LPC_I2C_TypeDef *);
+static uint8_t I2C_SendByte(LPC_I2C_TypeDef *, uint8_t);
+static uint8_t I2C_GetByte(LPC_I2C_TypeDef *, uint8_t *, Bool);
+
 static I2C_CFG_T i2cdat[3];
 
 void I2C0_Init(void)   
@@ -30,7 +36,7 @@ void I2C0_Init(void)
  * @param[in]	I2Cx I2C peripheral selected, should be I2C0, I2C1 or I2C2
  * @return 		I2Cx status code
  **********************************************************************/
-uint8_t I2C_Start(LPC_I2C_TypeDef *I2Cx)
+static uint8_t I2C_Start(LPC_I2C_TypeDef *I2Cx)
 {
 	I2Cx->I2CONCLR = (1<<STA)|(1<<STO);
 	I2Cx->I2CONCLR = I2C_I2CONCLR_SIC;
@@ -47,7 +53,7 @@ uint8_t I2C_Start(LPC_I2C_TypeDef *I2Cx)
  * @param[in]	I2Cx I2C peripheral selected, should be I2C0, I2C1 or I2C2
  * @return 		None
  **********************************************************************/
-void I2C_Stop(LPC_I2C_TypeDef *I2Cx)
+static void I2C_Stop(LPC_I2C_TypeDef *I2Cx)
 {
 	/* Make sure start bit is not active */
 	if (I2Cx->I2CONSET & I2C_I2CONSET_STA)
@@ -63,7 +69,7 @@ void I2C_Stop(LPC_I2C_TypeDef *I2Cx)
  * @param[in]	Databyte to be sent
  * @return 		I2Cx status code
  **********************************************************************/
-uint8_t I2C_SendByte(LPC_I2C_TypeDef *I2Cx, uint8_t databyte)
+static uint8_t I2C_SendByte(LPC_I2C_TypeDef *I2Cx, uint8_t databyte)
 {
 	/* Make sure start bit is not active */
 	if (I2Cx->I2CONSET & I2C_I2CONSET_STA)
@@ -83,7 +89,7 @@ uint8_t I2C_SendByte(LPC_I2C_TypeDef *I2Cx, uint8_t databyte)
  * @param[in]	ack to TRUE will generate an ACK, FALSE will generate a NACK
  * @return 		I2Cx status code
  **********************************************************************/
-uint8_t I2C_GetByte(LPC_I2C_TypeDef *I2Cx, uint8_t *retdat, Bool ack)
+static uint8_t I2C_GetByte(LPC_I2C_TypeDef *I2Cx, uint8_t *retdat, Bool ack)
 {
 	if (ack == TRUE)
 		I2Cx->I2CONSET = I2C_I2CONSET_AA;
