@@ -6,28 +6,37 @@
 
 void ReadAcc(float *data)
 {
-	int16_t temp[3];
-	//BMA180_BurstRead(temp);
+	uint8_t temp[6];
+	BMA180_BurstRead(temp);
+	
+	int16_t rate[3];
+	rate[0] = (int16_t)((temp[1]<<8)|temp[0]);
+	rate[1] = (int16_t)((temp[3]<<8)|temp[2]);
+	rate[2] = (int16_t)((temp[5]<<8)|temp[4]);
+	
+	rate[0] >>= 2;
+	rate[1] >>= 2;
+	rate[2] >>= 2;
 	
 	// X-axis
 	#if configFLIP_ACC_X == 0
-		*data = (float)*temp;
+		*data = (float)rate[0];
 	#else
-		*data = -(float)*temp;
+		*data = -(float)rate[0];
 	#endif
 	
 	// Y-axis
 	#if configFLIP_ACC_Y == 0
-		*(data+1) = (float)*(temp+1);
+		*(data+1) = (float)rate[1];
 	#else
-		*(data+1) = -(float)*(temp+1);
+		*(data+1) = -(float)rate[1];
 	#endif
 	
 	// Z-axis
 	#if configFLIP_ACC_Z == 0
-		*(data+2) = (float)*(temp+2);
+		*(data+2) = (float)rate[2];
 	#else
-		*(data+2) = -(float)*(temp+2);
+		*(data+2) = -(float)rate[2];
 	#endif
 }
 
@@ -37,27 +46,33 @@ void ReadAcc(float *data)
  **/
 void ReadGyroRate(float *data)
 {
-	int16_t temp[3];
+	uint8_t temp[6];
+	ITG3200_BurstRead(temp);
+	
+	int16_t rate[3];
+	rate[0] = (int16_t)((temp[0]<<8)|temp[1]);
+	rate[1] = (int16_t)((temp[2]<<8)|temp[3]);
+	rate[2] = (int16_t)((temp[4]<<8)|temp[5]);
 	
 	// X-axis
 	#if configFLIP_GYRO_X == 0
-		*data = (float)*(temp+1)*RATE2DEGPS;
+		*data = (float)(rate[1])*RATE2DEGPS;
 	#else
-		*data = -(float)*(temp+1)*RATE2DEGPS;
+		*data = -(float)(rate[1])*RATE2DEGPS;
 	#endif
 	
 	// Y-axis
 	#if configFLIP_GYRO_Y == 0
-		*(data+1) = (float)(*temp)*RATE2DEGPS;
+		*(data+1) = (float)(rate[0])*RATE2DEGPS;
 	#else
-		*(data+1) = -(float)(*temp)*RATE2DEGPS;
+		*(data+1) = -(float)(rate[0])*RATE2DEGPS;
 	#endif
 	
 	// Z-axis
 	#if configFLIP_GYRO_Z == 0
-		*(data+2) = (float)*(temp+2)*RATE2DEGPS;
+		*(data+2) = (float)(rate[2])*RATE2DEGPS;
 	#else
-		*(data+2) = -(float)*(temp+2)*RATE2DEGPS;
+		*(data+2) = -(float)(rate[2])*RATE2DEGPS;
 	#endif
 }
 

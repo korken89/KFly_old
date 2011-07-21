@@ -34,15 +34,15 @@ void vInitInputs(void)
  * 		...
  * Bit 5 = Channel 6
  * 
- * Bit Set = Normal Operation
- * Bit Cleared = No Connection
+ * Bit Cleared = Normal Operation
+ * Bit Set = No Connection
  **/
 uint8_t GetInputStatus(void)
 {
 	uint8_t status;
 	for (uint8_t i = 0; i < 6; i++)
 	{
-		if (GetInputLevel(i) > 0)
+		if (GetInputLevel(i) == 0)
 			status |= (1<<i);
 	}
 	

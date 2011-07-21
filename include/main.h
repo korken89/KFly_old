@@ -29,7 +29,7 @@
 #include "kalman.h"
 #include "pid.h"
 
-void prvSetupHardware( void );
+void prvSetupHardware(void);
 void main(void);
 void vTask1(void *);
 void vTaskControlLoop(void *);

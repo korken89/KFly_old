@@ -8,17 +8,17 @@ void main( void )
 	/* Load Tasks */
 	/*xTaskCreate(vTask1,
 				"Blink",
-				20,
+				80,
 				NULL,
 				1,
-				NULL);
+				NULL);*/
 				
 	xTaskCreate(vTaskControlLoop,
 				"Control",
 				200,
 				NULL,
 				2,
-				NULL);*/
+				NULL);
 				
 	xTaskCreate(vTaskArmDisarm,
 				"Arm/Disarm",
@@ -51,7 +51,7 @@ void prvSetupHardware( void )
 	Timer2_Init();
 	SystemInit();
 	__enable_irq();
-	//BMA180_Init(BW_150HZ, RANGE_2G);
+	BMA180_Init(BW_150HZ, RANGE_2G);
 	ITG3200_Init();
 }
 
@@ -61,11 +61,7 @@ void vTask1(void *pvParameters)
 	{
 		setLED(1);
 		clearLED(2);
-		vTaskDelay(200 / portTICK_RATE_MS);
-		
-		setLED(2);
-		clearLED(1);
-		vTaskDelay(200 / portTICK_RATE_MS);
+		vTaskDelay(100 / portTICK_RATE_MS);
 	}
 }
 
@@ -89,24 +85,23 @@ void vTaskControlLoop(void *pvParameters)
 	
 	while (1)
 	{
-		//ReadAccAngle(acc_tmp);
-		//ReadGyroRate(gyro_tmp);
+		ReadAccAngle(acc_tmp);
+		ReadGyroRate(gyro_tmp);
 		
-		/*UpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
+		UpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
 		UpdKalman(&data_yz, acc_tmp[1], gyro_tmp[1]);
 		
-		pid_tmp[0] = PIDUpdatePitch(&data_pitch, &data_xz);
-		pid_tmp[1] = PIDUpdateRoll(&data_roll, &data_yz);*/
+
+		
+		if (PIDArmed() == TRUE)
+		{
+			pid_tmp[0] = PIDUpdatePitch(&data_pitch, &data_xz);
+			pid_tmp[1] = PIDUpdateRoll(&data_roll, &data_yz);
+		}
 		
 		
-		/*ftoa(data_xz.x1);
-		UART0_SendChar('\t');
-		
-		ftoa(data_yz.x1);
-		
-		UART0_SendChar('\n');*/
-		
-		vTaskDelayUntil(&xLastWakeTime, (int)UPDATE_RATE / portTICK_RATE_MS);
+
+		vTaskDelayUntil(&xLastWakeTime, (int)(1000.0f/UPDATE_RATE) / portTICK_RATE_MS);
 	}
 }
 
@@ -118,31 +113,44 @@ void vTaskArmDisarm(void *pvParameters)
 	
 	while (1)
 	{
-		if (arm_counter > 99)
+		// Arming and disarming the regulator
+		if ((GetInputLevel(THROTTLE_CHANNEL) > 0.1f) && (EnginesArmed() == TRUE))
+		{
+			PIDArm();
+			setLED(2);
+		}
+		else
+		{
+			PIDDisarm();
+			clearLED(2);
+		}
+			
+		// Arming and disarming the engines
+		if (arm_counter > 9)
 		{
 			arm_counter = 0;
 			disarm_counter = 0;
+			ArmEngines();
 			setLED(1);
-			setLED(2);
 		}
 		else if ((GetInputLevel(THROTTLE_CHANNEL) < 0.05f) && (GetInputLevel(YAW_CHANNEL) < -0.95f))
 			arm_counter++;
 		else
 			arm_counter = 0;
 			
-		if (disarm_counter > 99)
+		if (disarm_counter > 9)
 		{
 			arm_counter = 0;
 			disarm_counter = 0;
+			DisarmEngines();
 			clearLED(1);
-			clearLED(2);
 		}
 		else if ((GetInputLevel(THROTTLE_CHANNEL) < 0.05f) && (GetInputLevel(YAW_CHANNEL) > 0.95f))
 			disarm_counter++;
 		else
 			disarm_counter = 0;
-			
-		vTaskDelayUntil(&xLastWakeTime, 10 / portTICK_RATE_MS);
+		
+		vTaskDelayUntil(&xLastWakeTime, 100 / portTICK_RATE_MS);
 	}
 }
 

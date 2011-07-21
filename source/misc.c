@@ -1,4 +1,4 @@
-#include "../include/misc.h"
+#include "misc.h"
 
 int cmpString(char* str1, char* str2)
 {

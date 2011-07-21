@@ -2,6 +2,7 @@
 #define ITG3200_H_
 
 #include "i2c.h"
+#include "configKFly.h"
 #include "lpc_types.h"
 #include "uart.h"
 
@@ -19,7 +20,7 @@
 
 #define INT_CONFIG			(RAW_RDY_EN<<0)|(ITG_RDY_EN<<2)|(INT_ANYRD_2CLEAR<<4)|(LATCH_INT_EN<<5)|(OPEN<<6)|(ACTL<<7)
 
-#define WHO					0x00
+#define ITG3200_ID			0x00
 #define	SMPL				0x15
 #define DLPF				0x16
 #define INT_C				0x17
@@ -34,17 +35,20 @@
 #define GZ_L				0x22
 #define PWR_M				0x3E
 
+#define DLPF_CFG			0
+#define FS_SEL				3
+
 #define RATE2DEGPS			1.0f/14.375f	// Datasheet: 14.375LSB per deg/s
 
-struct gyro_data {
+typedef struct {
 	int16_t x;
 	int16_t y;
 	int16_t z;
-};
+} gyro_data;
 
-Status ITG3200_Init(void);
-void ITG3200_BurstRead(int16_t *);
-uint8_t ITG3200_Read(uint8_t);
-void ITG3200_Write(uint8_t, uint8_t);
+void ITG3200_Init(void);
+Status ITG3200_BurstRead(uint8_t *);
+Status ITG3200_Read(uint8_t, uint8_t*);
+Status ITG3200_Write(uint8_t, uint8_t);
 
 #endif

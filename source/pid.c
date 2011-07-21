@@ -1,5 +1,8 @@
 #include "pid.h"
 
+volatile Bool bEnginesArmed = FALSE;
+volatile Bool bPIDArmed = FALSE;
+
 void InitPID(pid_data *PID)
 {
 	PID->iState = 0.0f;
@@ -52,4 +55,34 @@ float PIDUpdateRoll(pid_data *PID, kalman_data *data)
 float PIDUpdateYaw(pid_data *PID, float yawrate)
 {
 	return 0.0f;
+}
+
+void PIDArm(void)
+{
+	bPIDArmed = TRUE;
+}
+
+void PIDDisarm(void)
+{
+	bPIDArmed = FALSE;
+}
+
+Bool PIDArmed(void)
+{
+	return (Bool)bPIDArmed;
+}
+
+void ArmEngines(void)
+{
+	bEnginesArmed = TRUE;
+}
+
+void DisarmEngines(void)
+{
+	bEnginesArmed = FALSE;
+}
+
+Bool EnginesArmed(void)
+{
+	return (Bool)bEnginesArmed;
 }

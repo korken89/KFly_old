@@ -5,6 +5,7 @@
 
 #define BMA180_R		0b10000011
 #define BMA180_W		0b10000010
+#define BMA180_ADDR		0b01000001
 
 /**
  *	Address defines for BMA180 
@@ -74,8 +75,8 @@ struct _acc_data {
 typedef struct _acc_data acc_data;
 
 void BMA180_Init(uint8_t, uint8_t);
-void BMA180_BurstRead(int16_t *);
-uint8_t BMA180_Read(uint8_t);
-void BMA180_Write(uint8_t, uint8_t);
+Status BMA180_BurstRead(uint8_t *);
+Status BMA180_Read(uint8_t, uint8_t*);
+Status BMA180_Write(uint8_t, uint8_t);
 
 #endif

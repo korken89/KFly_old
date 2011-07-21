@@ -4,6 +4,7 @@
 #include "configKFly.h"
 #include "kalman.h"
 #include "input.h"
+#include "lpc_types.h"
 
 // Safeguards so the regulator won't overflow
 #define PID_IMAX		1000000.0f
@@ -23,5 +24,11 @@ void InitPID(pid_data *);
 float PIDUpdatePitch(pid_data *, kalman_data *);
 float PIDUpdateRoll(pid_data *, kalman_data *);
 float PIDUpdateYaw(pid_data *, float);
+void PIDArm(void);
+void PIDDisarm(void);
+Bool PIDArmed(void);
+void ArmEngines(void);
+void DisarmEngines(void);
+Bool EnginesArmed(void);
 
 #endif
