@@ -29,27 +29,27 @@ void PWM_setOutput(int16_t value, uint8_t channel)
     switch(channel)
     {
 		case 0:
-			LPC_PWM1->MR1 = 1499-value;
+			LPC_PWM1->MR1 = PWM_LOW-value;
 			break;
             
 		case 1:
-			LPC_PWM1->MR2 = 1499-value;
+			LPC_PWM1->MR2 = PWM_LOW-value;
 			break;
             
 		case 2:
-			LPC_PWM1->MR3 = 1499-value;
+			LPC_PWM1->MR3 = PWM_LOW-value;
             break;
             
         case 3:
-			LPC_PWM1->MR4 = 1499-value;
+			LPC_PWM1->MR4 = PWM_LOW-value;
             break;
             
 		case 4:
-			LPC_PWM1->MR5 = 1499-value;
+			LPC_PWM1->MR5 = PWM_LOW-value;
             break;
             
         case 5:
-			LPC_PWM1->MR6 = 1499-value;
+			LPC_PWM1->MR6 = PWM_LOW-value;
             break;
             
         default:

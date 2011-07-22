@@ -42,7 +42,7 @@ uint8_t GetInputStatus(void)
 	uint8_t status;
 	for (uint8_t i = 0; i < 6; i++)
 	{
-		if (GetInputLevel(i) == 0)
+		if (GetRawInputLevel(i) == 0)
 			status |= (1<<i);
 	}
 	

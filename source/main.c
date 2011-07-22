@@ -6,12 +6,12 @@ void main( void )
 	prvSetupHardware();
 
 	/* Load Tasks */
-	/*xTaskCreate(vTask1,
+	xTaskCreate(vTask1,
 				"Blink",
 				80,
 				NULL,
 				1,
-				NULL);*/
+				NULL);
 				
 	xTaskCreate(vTaskControlLoop,
 				"Control",
@@ -51,7 +51,7 @@ void prvSetupHardware( void )
 	Timer2_Init();
 	SystemInit();
 	__enable_irq();
-	BMA180_Init(BW_150HZ, RANGE_2G);
+	BMA180_Init(BW_300HZ, RANGE_2G);
 	ITG3200_Init();
 }
 
@@ -59,8 +59,7 @@ void vTask1(void *pvParameters)
 {
 	while (1)
 	{
-		setLED(1);
-		clearLED(2);
+
 		vTaskDelay(100 / portTICK_RATE_MS);
 	}
 }
@@ -69,14 +68,16 @@ void vTaskControlLoop(void *pvParameters)
 {
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	
-	float acc_tmp[2];
-	float gyro_tmp[3];
-	float pid_tmp[3];
-	kalman_data data_xz;
-	kalman_data data_yz;
+	static float acc_tmp[2];
+	static float gyro_tmp[3];
+	static float pid_tmp[3];
+	static float thr_pitch_pos, thr_pitch_neg, thr_roll_pos, thr_roll_neg, thr_base, thr_raw;
 	
-	pid_data data_roll;
-	pid_data data_pitch;
+	static kalman_data data_xz;
+	static kalman_data data_yz;
+	
+	static pid_data data_roll;
+	static pid_data data_pitch;
 	
 	InitKalman(&data_xz);
 	InitKalman(&data_yz);
@@ -91,17 +92,48 @@ void vTaskControlLoop(void *pvParameters)
 		UpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
 		UpdKalman(&data_yz, acc_tmp[1], gyro_tmp[1]);
 		
-
-		
 		if (PIDArmed() == TRUE)
 		{
-			pid_tmp[0] = PIDUpdatePitch(&data_pitch, &data_xz);
-			pid_tmp[1] = PIDUpdateRoll(&data_roll, &data_yz);
+			pid_tmp[0] = PIDUpdateChannel(&data_pitch, &data_xz, PITCH_CHANNEL);
+			pid_tmp[1] = PIDUpdateChannel(&data_roll, &data_yz, ROLL_CHANNEL);
 		}
 		
-		
+		if (EnginesArmed() == TRUE)
+		{
+			thr_raw = GetInputLevel(THROTTLE_CHANNEL);
+			
+			if (thr_raw > 0.05f)
+			{
+				thr_base = ((float)MAX_PWM*0.9f)*thr_raw;
+			
+				thr_pitch_pos = thr_base + pid_tmp[0];
+				thr_pitch_neg = thr_base - pid_tmp[0];
+			
+				thr_roll_pos = thr_base + pid_tmp[1];
+				thr_roll_neg = thr_base - pid_tmp[1];
+				
+				PWM_setOutput((int)thr_pitch_pos, 0);
+				PWM_setOutput((int)thr_pitch_neg, 1);
+				
+				PWM_setOutput((int)thr_roll_pos, 2);
+				PWM_setOutput((int)thr_roll_neg, 3);
+			}
+			else
+			{
+				PWM_setOutput(MAX_PWM/15, 0);
+				PWM_setOutput(MAX_PWM/15, 1);
+				
+				PWM_setOutput(MAX_PWM/15, 2);
+				PWM_setOutput(MAX_PWM/15, 3);
+			}
+		}
+		else
+		{
+			for (uint8_t i = 0; i < 6; i++)
+				PWM_setOutput(0, i);
+		}
 
-		vTaskDelayUntil(&xLastWakeTime, (int)(1000.0f/UPDATE_RATE) / portTICK_RATE_MS);
+		vTaskDelayUntil(&xLastWakeTime, 5 / portTICK_RATE_MS);
 	}
 }
 
@@ -126,6 +158,14 @@ void vTaskArmDisarm(void *pvParameters)
 		}
 			
 		// Arming and disarming the engines
+		/*if (GetInputStatus() & 0x0F)
+		{
+			arm_counter = 0;
+			disarm_counter = 0;
+			DisarmEngines();
+			clearLED(1);
+		}*/
+			
 		if (arm_counter > 9)
 		{
 			arm_counter = 0;
@@ -149,7 +189,7 @@ void vTaskArmDisarm(void *pvParameters)
 			disarm_counter++;
 		else
 			disarm_counter = 0;
-		
+			
 		vTaskDelayUntil(&xLastWakeTime, 100 / portTICK_RATE_MS);
 	}
 }

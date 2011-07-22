@@ -3,9 +3,9 @@
 void ITG3200_Init(void)
 {
 	ITG3200_Write(PWR_M, 0x80);						// Reset to defaults
-	ITG3200_Write(SMPL, 7);							// SMLPRT_DIV = 7 -> 1kHz/8 = 125Hz > UPDATE_RATE
-	ITG3200_Write(DLPF, (3<<DLPF_CFG)|(3<<FS_SEL));	// DLPF at 48Hz
-	ITG3200_Write(INT_C, INT_CONFIG);				// Generate interrupt when device is ready or raw data ready
+	ITG3200_Write(SMPL, 3);							// SMLPRT_DIV = 7 -> 1kHz/8 = 125Hz > UPDATE_RATE
+	ITG3200_Write(DLPF, (2<<DLPF_CFG)|(3<<FS_SEL));	// DLPF at 100Hz
+	ITG3200_Write(INT_C, INT_CONFIG);				// Generate interrupt when device is ready or raw data ready (not used)
 	ITG3200_Write(PWR_M, 0x00);						// Return to normal operation
 }
 

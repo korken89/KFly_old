@@ -4,6 +4,7 @@
 #include "bitvals.h"
 
 #define MAX_PWM		1000
+#define PWM_LOW		2360
 
 void PWM_Init(void);
 void PWM_setOutput(int16_t, uint8_t);
