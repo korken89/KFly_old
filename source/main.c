@@ -22,7 +22,7 @@ void main( void )
 				
 	xTaskCreate(vTaskArmDisarm,
 				"Arm/Disarm",
-				40,
+				80,
 				NULL,
 				1,
 				NULL);
@@ -32,7 +32,6 @@ void main( void )
 
 	/* 	Will only get here if there was insufficient memory to create the idle
 		task.  The idle task is created within vTaskStartScheduler(). */
-	float temp[3];
 	while(1)
 	{
 
@@ -92,29 +91,29 @@ void vTaskControlLoop(void *pvParameters)
 		UpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
 		UpdKalman(&data_yz, acc_tmp[1], gyro_tmp[1]);
 		
-		if (PIDArmed() == TRUE)
-		{
-			pid_tmp[0] = PIDUpdateChannel(&data_pitch, &data_xz, PITCH_CHANNEL);
-			pid_tmp[1] = PIDUpdateChannel(&data_roll, &data_yz, ROLL_CHANNEL);
-		}
-		
 		if (EnginesArmed() == TRUE)
 		{
+			if (PIDArmed() == TRUE)
+			{
+				pid_tmp[0] = PIDUpdateChannel(&data_pitch, &data_xz, PITCH_CHANNEL);
+				pid_tmp[1] = PIDUpdateChannel(&data_roll, &data_yz, ROLL_CHANNEL);
+			}
+			
 			thr_raw = GetInputLevel(THROTTLE_CHANNEL);
 			
 			if (thr_raw > 0.05f)
 			{
 				thr_base = ((float)MAX_PWM*0.9f)*thr_raw;
 			
+				// Pitch base throttle and differential throttle
 				thr_pitch_pos = thr_base + pid_tmp[0];
 				thr_pitch_neg = thr_base - pid_tmp[0];
-			
-				thr_roll_pos = thr_base + pid_tmp[1];
-				thr_roll_neg = thr_base - pid_tmp[1];
-				
 				PWM_setOutput((int)thr_pitch_pos, 0);
 				PWM_setOutput((int)thr_pitch_neg, 1);
 				
+				// Roll base throttle and differential throttle
+				thr_roll_pos = thr_base + pid_tmp[1];
+				thr_roll_neg = thr_base - pid_tmp[1];
 				PWM_setOutput((int)thr_roll_pos, 2);
 				PWM_setOutput((int)thr_roll_neg, 3);
 			}
@@ -156,15 +155,6 @@ void vTaskArmDisarm(void *pvParameters)
 			PIDDisarm();
 			clearLED(2);
 		}
-			
-		// Arming and disarming the engines
-		/*if (GetInputStatus() & 0x0F)
-		{
-			arm_counter = 0;
-			disarm_counter = 0;
-			DisarmEngines();
-			clearLED(1);
-		}*/
 			
 		if (arm_counter > 9)
 		{

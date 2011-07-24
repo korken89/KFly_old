@@ -32,7 +32,7 @@ float PIDUpdateChannel(pid_data *PID, kalman_data *data, uint8_t channel)
 	
 	rate_aim = PID->a_iState + angle_error;
 	
-	if (i > 18)
+	if (i > 19)
 	{	
 		ftoa(MAX_ANGLE*GetInputLevel(channel));
 		UART0_SendChar('\t');
