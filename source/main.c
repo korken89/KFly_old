@@ -70,18 +70,20 @@ void vTaskControlLoop(void *pvParameters)
 	static float acc_tmp[2];
 	static float gyro_tmp[3];
 	static float pid_tmp[3];
-	static float thr_pitch_pos, thr_pitch_neg, thr_roll_pos, thr_roll_neg, thr_base, thr_raw;
+	static float thr_base, thr_raw;
 	
 	static kalman_data data_xz;
 	static kalman_data data_yz;
 	
 	static pid_data data_roll;
 	static pid_data data_pitch;
+	static pid_data data_yaw;
 	
 	InitKalman(&data_xz);
 	InitKalman(&data_yz);
-	InitPID(&data_roll);
-	InitPID(&data_pitch);
+	InitPID(&data_roll, ROLL_CHANNEL);
+	InitPID(&data_pitch, PITCH_CHANNEL);
+	InitPID(&data_yaw, YAW_CHANNEL);
 	
 	while (1)
 	{
@@ -97,6 +99,7 @@ void vTaskControlLoop(void *pvParameters)
 			{
 				pid_tmp[0] = PIDUpdateChannel(&data_pitch, &data_xz, PITCH_CHANNEL);
 				pid_tmp[1] = PIDUpdateChannel(&data_roll, &data_yz, ROLL_CHANNEL);
+				pid_tmp[2] = PIDUpdateYaw(&data_yaw, gyro_tmp[2]);
 			}
 			
 			thr_raw = GetInputLevel(THROTTLE_CHANNEL);
@@ -106,24 +109,17 @@ void vTaskControlLoop(void *pvParameters)
 				thr_base = ((float)MAX_PWM*0.9f)*thr_raw;
 			
 				// Pitch base throttle and differential throttle
-				thr_pitch_pos = thr_base + pid_tmp[0];
-				thr_pitch_neg = thr_base - pid_tmp[0];
-				PWM_setOutput((int)thr_pitch_pos, 0);
-				PWM_setOutput((int)thr_pitch_neg, 1);
+				PWM_setOutput((int)(thr_base + pid_tmp[0] + pid_tmp[2]), 0);
+				PWM_setOutput((int)(thr_base - pid_tmp[0] + pid_tmp[2]), 1);
 				
 				// Roll base throttle and differential throttle
-				thr_roll_pos = thr_base + pid_tmp[1];
-				thr_roll_neg = thr_base - pid_tmp[1];
-				PWM_setOutput((int)thr_roll_pos, 2);
-				PWM_setOutput((int)thr_roll_neg, 3);
+				PWM_setOutput((int)(thr_base + pid_tmp[1] - pid_tmp[2]), 2);
+				PWM_setOutput((int)(thr_base - pid_tmp[1] - pid_tmp[2]), 3);
 			}
 			else
 			{
-				PWM_setOutput(MAX_PWM/15, 0);
-				PWM_setOutput(MAX_PWM/15, 1);
-				
-				PWM_setOutput(MAX_PWM/15, 2);
-				PWM_setOutput(MAX_PWM/15, 3);
+				for (uint8_t i = 0; i < 6; i++)
+					PWM_setOutput(MAX_PWM/15, i);
 			}
 		}
 		else

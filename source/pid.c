@@ -3,26 +3,49 @@
 volatile Bool bEnginesArmed = FALSE;
 volatile Bool bPIDArmed = FALSE;
 
-void InitPID(pid_data *PID)
+void InitPID(pid_data *PID, uint8_t channel)
 {
 	PID->a_iState = 0.0f;
 	PID->r_iState = 0.0f;
     
     //Fattigmanskalibrering!
-    PID->a_ki = 0.0f;
-	PID->a_kp = 20.0f;
+    if (channel == PITCH_CHANNEL)
+    {
+		PID->a_ki = 0.0f;
+		PID->a_kp = 0.0f;
+		
+		PID->r_ki = 0.005f;
+		PID->r_kp = 1.8f;
+	}
 	
-    PID->r_ki = 0.001f;
-	PID->r_kp = 0.25f;
+	if (channel == ROLL_CHANNEL)
+    {
+		PID->a_ki = 0.0f;
+		PID->a_kp = 0.0f;
+		
+		PID->r_ki = 0.001f;
+		PID->r_kp = 1.8f;
+	}
+	
+	if (channel == YAW_CHANNEL)
+    {
+		PID->a_ki = 0.0f;
+		PID->a_kp = 0.0f;
+		
+		PID->r_ki = 0.0f;
+		PID->r_kp = 2.0f;
+	}	
 }
 
 float PIDUpdateChannel(pid_data *PID, kalman_data *data, uint8_t channel)
 {	
 	static int i = 0;
-	float angle_error, rate_error, rate_i, rate_aim;
+	float angle_error, rate_error, rate_i, rate_aim, input;
 	
+	input = GetInputLevel(channel);
+		
 	/* Angle regulator starts here! */
-	angle_error = MAX_ANGLE*GetInputLevel(channel) - data->x1;
+	angle_error = MAX_ANGLE*input - data->x1;
 	PID->a_iState = PID->a_iState + angle_error*PID->a_ki;
 	
 	if (PID->a_iState > PID_IMAX)
@@ -30,19 +53,7 @@ float PIDUpdateChannel(pid_data *PID, kalman_data *data, uint8_t channel)
 	else if (PID->a_iState < PID_IMIN)
 		PID->a_iState = PID_IMIN;
 	
-	rate_aim = PID->a_iState + angle_error;
-	
-	if (i > 19)
-	{	
-		ftoa(MAX_ANGLE*GetInputLevel(channel));
-		UART0_SendChar('\t');
-		ftoa(data->x1);
-		UART0_SendChar('\n');
-		i = 0;
-	}
-	else
-		i++;
-	
+	rate_aim = PID->a_iState + angle_error*PID->a_kp;
 	
 	if (rate_aim > MAX_RATE)
 		rate_aim = MAX_RATE;
@@ -63,7 +74,7 @@ float PIDUpdateChannel(pid_data *PID, kalman_data *data, uint8_t channel)
  
 float PIDUpdateYaw(pid_data *PID, float yawrate)
 {
-	return 0.0f;
+	return (MAX_YAW_RATE*GetInputLevel(YAW_CHANNEL) - yawrate)*PID->r_kp;
 }
 
 void PIDArm(void)

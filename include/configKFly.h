@@ -9,11 +9,14 @@
 #define PID_IMIN		-PID_IMAX
 
 // Maximum angle of the aircraft in stability mode (in deg)
-#define MAX_ANGLE		30.0f	// 30 deg max
+#define MAX_ANGLE		35.0f	// 35 deg max
 
 // Maximum angular rate of the aircraft in acrobatic mode (in deg/s)
 #define MAX_RATE		180.0f	// 180 deg/s max
 #define MIN_RATE		-MAX_RATE
+
+// Maximum angular rate of the aircraft in Yaw
+#define MAX_YAW_RATE	90.0f
 
 // Update rate for all regulators and filters in Hz
 #define UPDATE_RATE 	200.0f

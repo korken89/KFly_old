@@ -12,15 +12,13 @@
 typedef struct {
 	float a_iState;
 	float r_iState;
-	
     float a_ki;
 	float a_kp;
-
 	float r_ki;
 	float r_kp;
 } pid_data;
 
-void InitPID(pid_data *);
+void InitPID(pid_data *, uint8_t);
 float PIDUpdateChannel(pid_data *, kalman_data *, uint8_t);
 float PIDUpdateYaw(pid_data *, float);
 void PIDArm(void);

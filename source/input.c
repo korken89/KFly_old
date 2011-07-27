@@ -120,7 +120,7 @@ float GetInputLevel(uint8_t channel)
 	int16_t level = (int16_t)GetRawInputLevel(channel) - (int16_t)sInputCalibration.ch_center[channel];
 	float temp;
 	
-	if (level > 0)
+	if (level > 0.0f)
 	{
 		if (sInputCalibration.ch_center[channel] == sInputCalibration.ch_top[channel])
 			return 0.0f;
@@ -133,7 +133,7 @@ float GetInputLevel(uint8_t channel)
 			return temp;
 	}
 		
-	else if (level < 0)
+	else if (level < 0.0f)
 	{
 		if (sInputCalibration.ch_center[channel] == sInputCalibration.ch_bottom[channel])
 			return 0.0f;
