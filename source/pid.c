@@ -11,29 +11,29 @@ void InitPID(pid_data *PID, uint8_t channel)
     //Fattigmanskalibrering!
     if (channel == PITCH_CHANNEL)
     {
-		PID->a_ki = 0.0f;
-		PID->a_kp = 0.0f;
-		
-		PID->r_ki = 0.005f;
 		PID->r_kp = 1.8f;
+		PID->r_ki = 0.001f;
+		
+		PID->a_kp = 0.5f;
+		PID->a_ki = 0.0f;
 	}
 	
 	if (channel == ROLL_CHANNEL)
     {
-		PID->a_ki = 0.0f;
-		PID->a_kp = 0.0f;
-		
-		PID->r_ki = 0.001f;
 		PID->r_kp = 1.8f;
+		PID->r_ki = 0.001f;
+		
+		PID->a_kp = 0.5f;
+		PID->a_ki = 0.0f;
 	}
 	
 	if (channel == YAW_CHANNEL)
     {
-		PID->a_ki = 0.0f;
-		PID->a_kp = 0.0f;
-		
-		PID->r_ki = 0.0f;
 		PID->r_kp = 2.0f;
+		PID->r_ki = 0.0f;
+		
+		PID->a_kp = 0.0f;
+		PID->a_ki = 0.0f;
 	}	
 }
 
