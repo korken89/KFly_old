@@ -141,6 +141,16 @@ void vTaskArmDisarm(void *pvParameters)
 	while (1)
 	{
 		// Arming and disarming the regulator
+		if (GetInputStatus() & CHANNELMASK)
+		{	// No valid inputs. Disarm everything
+			arm_counter = 0;
+			disarm_counter = 0;
+			PIDDisarm();
+			DisarmEngines();
+			clearLED(1);
+			clearLED(2);
+		}
+		
 		if ((GetInputLevel(THROTTLE_CHANNEL) > 0.1f) && (EnginesArmed() == TRUE))
 		{
 			PIDArm();
