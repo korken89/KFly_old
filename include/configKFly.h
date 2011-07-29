@@ -29,4 +29,4 @@
 
 #define configFLIP_GYRO_X	0
 #define configFLIP_GYRO_Y	1
-#define configFLIP_GYRO_Z	0
+#define configFLIP_GYRO_Z	1

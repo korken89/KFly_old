@@ -6,12 +6,12 @@ void main( void )
 	prvSetupHardware();
 
 	/* Load Tasks */
-	xTaskCreate(vTask1,
+	/*xTaskCreate(vTask1,
 				"Blink",
 				80,
 				NULL,
 				1,
-				NULL);
+				NULL);*/
 				
 	xTaskCreate(vTaskControlLoop,
 				"Control",
@@ -34,7 +34,7 @@ void main( void )
 		task.  The idle task is created within vTaskStartScheduler(). */
 	while(1)
 	{
-
+		
 	}
 }
 
@@ -56,10 +56,30 @@ void prvSetupHardware( void )
 
 void vTask1(void *pvParameters)
 {
+	uint8_t ch = 'T';
 	while (1)
 	{
+		if (UART0_CharReady())
+			ch = UART0_GetChar();
+		
+		if (ch == 'B')
+		{
+			PWM_setOutput(0, 1);
+			PWM_setOutput(0, 2);
+			PWM_setOutput(0, 3);
+			
+			clearLED(1);
+			clearLED(2);
+		}
+		else if (ch == 'T')
+		{
+			PWM_setOutput(1000, 1);
+			PWM_setOutput(1000, 2);
+			PWM_setOutput(1000, 3);			
 
-		vTaskDelay(100 / portTICK_RATE_MS);
+			setLED(1);
+			setLED(2);
+		}
 	}
 }
 

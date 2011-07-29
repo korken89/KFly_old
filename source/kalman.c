@@ -1,6 +1,6 @@
 /**
- * Original by Linus Helgesson (LHelge) at www.elektronikforumet.com/forum
- * Edited by Emil Fresk (Korken) at www.elektronikforumet.com/forum
+ * Original by Linus Helgesson (LHelge at www.elektronikforumet.com/forum)
+ * Edited & optimized by Emil Fresk (Korken at www.elektronikforumet.com/forum)
  **/
 
 #include "kalman.h"

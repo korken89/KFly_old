@@ -106,9 +106,6 @@ void Reset_Handler(void)
 	// Clear the BSS segment
 	memset(&_BSS_START, 0, &_BSS_END - &_BSS_START);
 	
-	// Some delay so debugger has time to halt target
-	for (volatile int i = 0; i < 1000000; i++);
-	
 	// Go to main program
 	main();
 }

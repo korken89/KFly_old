@@ -5,12 +5,12 @@
 
 #define DT 			1.0f/UPDATE_RATE 
 // Q diagonal 3x3 with these elements on diagonal
-#define Q1 			5.0f
-#define Q2 			100.0f
-#define Q3 			0.01f
+#define Q1 			5.0f		// How well do the model represent the changes of Angle
+#define Q2 			100.0f		// How well do the model represent the changes of Angular Velocity
+#define Q3 			0.01f		// How well do the model represent the changes of Gyro Bias
 // R diagonal 2x2 with these elements on diagonal
-#define R1 			1000.0f
-#define R2 			1000.0f
+#define R1 			20.0f		// How much do we trust the measurement of Angle
+#define R2 			1000.0f		// How much do we trust the measurement of Angular Velocity
 
 struct _kalman_data
 {

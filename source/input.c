@@ -6,20 +6,20 @@ volatile input_calibration sInputCalibration;
 void vInitInputs(void)
 {
 	// Fattigmanskalibrering!
-	sInputCalibration.ch_bottom[0] = 1056;
-	sInputCalibration.ch_bottom[1] = 1084;
-	sInputCalibration.ch_bottom[2] = 1121;
-	sInputCalibration.ch_bottom[3] = 1020;
+	sInputCalibration.ch_bottom[0] = 1017;
+	sInputCalibration.ch_bottom[1] = 1074;
+	sInputCalibration.ch_bottom[2] = 1063;
+	sInputCalibration.ch_bottom[3] = 1078;
 	
-	sInputCalibration.ch_center[0] = 1501;
-	sInputCalibration.ch_center[1] = 1084;
-	sInputCalibration.ch_center[2] = 1496;
-	sInputCalibration.ch_center[3] = 1497;
+	sInputCalibration.ch_center[0] = 1498;
+	sInputCalibration.ch_center[1] = 1074;
+	sInputCalibration.ch_center[2] = 1501;
+	sInputCalibration.ch_center[3] = 1508;
 	
-	sInputCalibration.ch_top[0] = 1938;
-	sInputCalibration.ch_top[1] = 1764;
-	sInputCalibration.ch_top[2] = 1934;
-	sInputCalibration.ch_top[3] = 1884;
+	sInputCalibration.ch_top[0] = 1947;
+	sInputCalibration.ch_top[1] = 1752;
+	sInputCalibration.ch_top[2] = 1870;
+	sInputCalibration.ch_top[3] = 1967;
 	
 	
 	EINT_Init();

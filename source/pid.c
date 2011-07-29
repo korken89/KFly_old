@@ -9,21 +9,12 @@ void InitPID(pid_data *PID, uint8_t channel)
 	PID->r_iState = 0.0f;
     
     //Fattigmanskalibrering!
-    if (channel == PITCH_CHANNEL)
+	if ((channel == ROLL_CHANNEL) || (channel == PITCH_CHANNEL))
     {
-		PID->r_kp = 0.5f;
+		PID->r_kp = 1.5f;
 		PID->r_ki = 0.01f;
 		
-		PID->a_kp = 2.0f;
-		PID->a_ki = 0.0f;
-	}
-	
-	if (channel == ROLL_CHANNEL)
-    {
-		PID->r_kp = 0.5f;
-		PID->r_ki = 0.01f;
-		
-		PID->a_kp = 2.0f;
+		PID->a_kp = 0.6f;
 		PID->a_ki = 0.0f;
 	}
 	
