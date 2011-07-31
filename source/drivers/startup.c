@@ -8,6 +8,7 @@
 #include "LPC17xx.h"
 
 extern void Timer0_IRQHandler(void);
+extern void UART0_IRQHandler(void);
 extern void EINT3_IRQHandler(void);
 extern void I2C0_IRQHandler(void);
 extern void main(void);
@@ -52,7 +53,7 @@ __attribute__((section(".vectors"))) void* vectors[] = {
 	0, //TIMER1_IRQHandler,		/* Timer1 */
 	0, //TIMER2_IRQHandler,		/* Timer2 */
 	0, //TIMER3_IRQHandler,		/* Timer3 */
-	0, //UART0_IRQHandler,		/* UART0 */
+	UART0_IRQHandler,			/* UART0 */
 	0, //UART1_IRQHandler,		/* UART1 */
 	0, //UART2_IRQHandler,		/* UART2 */
 	0, //UART3_IRQHandler,		/* UART3 */

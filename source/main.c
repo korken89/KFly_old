@@ -1,4 +1,5 @@
 #include "main.h"
+#include "telemetry.h"
 
 void main( void )
 {
@@ -43,6 +44,7 @@ void prvSetupHardware( void )
 	__disable_irq();
 	LED_Init();
 	UART_Init();
+	startTelemetry();
 	//GPS_UART_Init();
 	PWM_Init();
 	I2C0_Init();

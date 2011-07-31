@@ -11,5 +11,6 @@ void startTelemetry(void);
 void stopTelemetry(void);
 void rxWait(void);
 void rxPing(void);
+void rxTest(void);
 
 #endif

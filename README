@@ -15,6 +15,7 @@ S:		| ACK
 
 ACK:	0xFF
 NACK:	0x00
+CHKSUM: 8-bit CRC
 
 
 -: Commands :-

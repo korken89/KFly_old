@@ -22,6 +22,7 @@ void UART_Init(void)
 	LPC_UART0->LCR &= ~(1<<7);						// Disable access to divisor latches
 	LPC_UART0->FCR = (1<<0);						// Enable FIFO
 	LPC_UART0->FCR |= (1<<1)|(1<<2);				// Reset TX and RX
+	LPC_UART0->IER = (1<<0);					// Enable Recived & Sent interrupts
 	
 	/** UART1 
 	
@@ -66,7 +67,7 @@ void UART0_SendString(char* str)
  */
 char UART0_CharReady(void)
 {
-	return (LPC_UART0->LSR & (1<<0));		// Reciver status
+	return (LPC_UART0->LSR & (1<<0));	// Reciver status
 }
 
 /**
