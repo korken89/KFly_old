@@ -1,2 +1,30 @@
-The PCB Design are in beta and not yet tested!
-Use them at your own risk.
+--: Config Datalink (Telemetry) :--
+
+-: Data format :-
+- Send
+M:	CMD	|	  | SIZE |	   | DATA |		|	   	 | ACK
+S:		| ACK |		 | ACK |	  | ACK | CHKSUM |
+
+- Recieve
+M:	CMD	|	  |	  	 | ACK |	  | ACK | CHKSUM |
+S:		| ACK | SIZE |	   | DATA |		|	     | ACK
+
+- Command without data
+M:	CMD	|
+S:		| ACK
+
+ACK:	0xFF
+NACK:	0x00
+
+
+-: Commands :-
+Value	Description (from computer POV)
+-------------------------------------------
+0x01	Ping/Pong
+0x02	Get regulator data		
+0x03	Set regulator data
+0x04	Get channel mixing
+0x05	Set channel mixing
+0x06	Calibrate RC-inputs
+0x07	Get RC calibrated data
+0x08	Get RC values

@@ -1,14 +1,14 @@
 /******************************************************************************
  * @file :   	uart.c
  * @brief : 	UART Functions 
- * @version : 	V1.0
+ * @version : 	1.0
  * @author :	Emil Fresk
  ******************************************************************************/
 
 #include "uart.h"
-/**
- * @brief UART1 Init...
- */
+
+functiontype HandlerFunction = NULL;
+
 void UART_Init(void)
 {
 	/** UART0 */
@@ -77,50 +77,13 @@ char UART0_GetChar(void)
 	return (char)LPC_UART0->RBR;		// Reciver status
 }
 
-/**
- * @brief 	UART process function.
- * 			Checks for characters to beread and store them in the buffer.
- *
-void UART_Process(void)
+void UART0_SetIRQHandler(functiontype func)
 {
-	static int cnt = 0;
-	char tmp;
-	if (UART_CharReady())
-	{
-		if (UART_buffer->rIndex >= BUFFER_SIZE)
-		{
-			UART_SendString("Buffer overflow!\nResetting buffer...\n\0");
-			UART_buffer->rIndex = 0;
-			for (char i = 0; i < BUFFER_SIZE; i++)
-				UART_buffer->rBuffer[i] = '\0';
-		}
-		else
-		{
-			tmp = (char)UART0->RBR;
-			int tmp2;
-			UART_buffer->rBuffer[UART_buffer->rIndex++] = tmp;
-			
-			if (tmp == '\0' || tmp == '\r' || tmp == '\n')
-			{
-				tmp2 = atoi(UART_buffer->rBuffer);
-				if (tmp2 > 0)
-				{
-					tmp_buffer[cnt] = tmp2;
-					tmp_buffer[BUF_SIZE-1] = cnt++;
-				}
-				else if (cmpString("flush\0", UART_buffer->rBuffer))
-				{
-					for (int f_i = 0; f_i <= tmp_buffer[BUF_SIZE-1]; f_i++)
-					{
-						UART_SendString(itoa(tmp_buffer[f_i], 10));
-						UART_SendChar('\n');
-					}
-					
-					cnt = 0;
-				}
-				UART_buffer->rIndex = 0;
-			}
-		}				
-	}
+	HandlerFunction = func;
 }
-*/
+
+void UART0_IRQHandler(void)
+{
+	if (HandlerFunction != NULL)
+		HandlerFunction();
+}

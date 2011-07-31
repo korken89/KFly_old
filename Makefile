@@ -19,11 +19,12 @@ SRCC +=	$(RTOS_DIR)list.c $(RTOS_DIR)tasks.c $(RTOS_DIR)queue.c $(RTOS_PORT)port
 
 # User program source files
 SRCC +=	$(DIR)main.c $(DIR)misc.c $(DIR)fmath.c $(DIR)sensors.c  $(DIR)kalman.c $(DIR)pid.c $(DIR)input.c 
+SRCC +=	$(DIR)telemetry.c
 
 # All object files for linking
 SRCO = 	syscalls.o startup.o system_LPC17xx.o list.o tasks.o queue.o port.o heap_1.o main.o extint.o
 SRCO += misc.o fmath.o leds.o timer.o uart.o pwm.o gps.o sensors.o kalman.o pid.o i2c.o itg3200.o bma180.o
-SRCO += input.o
+SRCO += input.o telemetry.o
 
 all: clean main.elf
 	
