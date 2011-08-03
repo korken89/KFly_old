@@ -9,8 +9,8 @@ S:							   | ACK (if ACK-bit is set)
 M:		    	 	   		   | ACK (if ACK-bit is set)
 S:	CMD | SIZE | DATA | CHKSUM |
 
-ACK		0xFF
-NACK	0x00
+ACK:	0xFF 0x00 CHKSUM
+NACK:	0xFE msg_length error_msg CHKSUM
 CHKSUM: 8-bit CRC
 
 -: Commands :-
