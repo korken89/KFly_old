@@ -2,21 +2,16 @@
 
 -: Data format :-
 - Send
-M:	CMD	|	  | SIZE |	   | DATA |		|	   	 | ACK
-S:		| ACK |		 | ACK |	  | ACK | CHKSUM |
+M:	CMD	| SIZE | DATA | CHKSUM |
+S:							   | ACK (if ACK-bit is set)
 
 - Recieve
-M:	CMD	|	  |	  	 | ACK |	  | ACK | CHKSUM |
-S:		| ACK | SIZE |	   | DATA |		|	     | ACK
+M:		    	 	   		   | ACK (if ACK-bit is set)
+S:	CMD | SIZE | DATA | CHKSUM |
 
-- Command without data
-M:	CMD	|
-S:		| ACK
-
-ACK:	0xFF
-NACK:	0x00
+ACK		0xFF
+NACK	0x00
 CHKSUM: 8-bit CRC
-
 
 -: Commands :-
 Value	Description (from computer POV)

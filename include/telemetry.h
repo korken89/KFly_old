@@ -10,7 +10,11 @@
 void startTelemetry(void);
 void stopTelemetry(void);
 void rxWait(void);
+void GetDataCount(void);
+void GetData(void);
+void CheckCRC(void);
 void rxPing(void);
 void rxTest(void);
+uint8_t crc8(uint8_t *, uint8_t);
 
 #endif
