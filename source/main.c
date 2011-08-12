@@ -33,6 +33,7 @@ void main( void )
 
 	/* 	Will only get here if there was insufficient memory to create the idle
 		task.  The idle task is created within vTaskStartScheduler(). */
+	
 	while(1)
 	{
 		

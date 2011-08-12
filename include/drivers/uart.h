@@ -6,14 +6,16 @@
 #include "bitvals.h"
 #include "misc.h"
 
-typedef void (*functiontype)();
+#define FIFOBUFSIZE		128
 
 void UART_Init(void);
-void UART0_SendChar(char);
-void UART0_SendString(char *);
-char UART0_CharReady(void);
-char UART0_GetChar(void);
-void UART0_SetIRQHandler(functiontype);
+void UART0_SendChar(uint8_t);
+void UART0_SendString(uint8_t *);
+uint8_t UART0_CharReady(void);
+uint8_t UART0_GetChar(void);
+void UART0_SetReceivedIRQHandler(voidfunctype);
+void UART0_SendData(uint8_t *, uint8_t);
+void UART0_SendFIFO(void);
 void UART0_IRQHandler(void);
 
 #endif

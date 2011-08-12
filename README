@@ -9,12 +9,12 @@ S:							   | ACK (if ACK-bit is set)
 M:		    	 	   		   | ACK (if ACK-bit is set)
 S:	CMD | SIZE | DATA | CHKSUM |
 
-ACK:	0xFF 0x00 CHKSUM
-NACK:	0xFE msg_length error_msg CHKSUM
+ACK:	0x7F 0x00 CHKSUM
+NACK:	0x7E msg_length error_msg CHKSUM
 CHKSUM: 8-bit CRC
 
 -: Commands :-
-Value	Description (from computer POV)
+Value	Description
 -------------------------------------------
 0x01	Ping 
 0x02	SaveToFlash

@@ -1,24 +1,24 @@
 #include "telemetry.h"
 
 volatile static uint8_t data_cnt;
-volatile static uint8_t data_array[256];
+volatile static uint8_t data_array[64];
 volatile static uint8_t counter;
 
 volatile static uint32_t data_rxerror = 0;
 volatile static uint32_t data_rxsuccess = 0;
 volatile static uint8_t CRC = 0;
-volatile functiontype parser = NULL;
+volatile voidfunctype parser = NULL;
 
 void startTelemetry(void)
 {
-    UART0_SetIRQHandler(rxWait);
+    UART0_SetReceivedIRQHandler(rxWait);
     NVIC_EnableIRQ(UART0_IRQn);
 }
 
 void stopTelemetry(void)
 {
     NVIC_DisableIRQ(UART0_IRQn);
-    UART0_SetIRQHandler(NULL);
+    UART0_SetReceivedIRQHandler(NULL);
 }
 
 void rxWait(void)
@@ -28,19 +28,66 @@ void rxWait(void)
 	
 	switch (cmd & 0x7F)
 	{
-		case 0x01:
-			UART0_SetIRQHandler(GetDataCount);
+		case 0x01: // Ping
+			UART0_SetReceivedIRQHandler(GetDataCount);
 			parser = rxPing;
 			break;
 			
-		case 0x02:
-			UART0_SetIRQHandler(GetDataCount);
-			parser = rxTest;
+		case 0x02: // SaveToFlash
+			UART0_SetReceivedIRQHandler(GetDataCount);
+			parser = rxSaveToFlash;
+			break;
+		
+		case 0x03: // GetRegulatorData
+			break;
+		
+		case 0x04: // SetRegulatorData
+			break;
+		
+		case 0x05: // GetChannelMix
+			break;
+		
+		case 0x06: // SetChannelMix
+			break;
+		
+		case 0x07: // SartRCCalibration
+			break;
+		
+		case 0x08: // StopRCCalibration
+			break;
+		
+		case 0x09: // CalibrateRCCenters
+			break;
+		
+		case 0x0A: // GetRCCalibration
+			break;
+		
+		case 0x0B: // SetRCCalibration
+			break;
+		
+		case 0x0C: // GetRCValues
 			break;
 		
 		default:
-			UART0_SendChar(NACK);
+			break;
 	}
+}
+
+void rxPing(void)
+{
+	UART0_SetReceivedIRQHandler(rxWait);
+	uint8_t msg[] = {1, 0};
+	UART0_SendChar(1);
+	UART0_SendChar(0);
+	UART0_SendChar(crc8(msg, 2));
+}
+
+void rxSaveToFlash(void)
+{
+	UART0_SetReceivedIRQHandler(rxWait);
+	
+	/* Add save to flash code */
+	
 }
 
 void GetDataCount(void)
@@ -48,7 +95,7 @@ void GetDataCount(void)
 	data_cnt = UART0_GetChar();
 	data_array[1] = data_cnt;
 	counter = 2;
-	UART0_SetIRQHandler(GetData);
+	UART0_SetReceivedIRQHandler(GetData);
 }
 
 void GetData(void)
@@ -71,23 +118,8 @@ void CheckCRC(void)
 	else
 	{
 		data_rxerror++;
-		UART0_SetIRQHandler(rxWait);
+		UART0_SetReceivedIRQHandler(rxWait);
 	}
-}
-
-void rxPing(void)
-{
-	UART0_SetIRQHandler(rxWait);
-	uint8_t msg[] = {1, 0};
-	UART0_SendChar(1);
-	UART0_SendChar(0);
-	UART0_SendChar(crc8(msg, 2));
-}
-
-void rxTest(void)
-{
-	UART0_SetIRQHandler(rxWait);
-	UART0_SendChar(UART0_GetChar());
 }
 
 uint8_t crc8(uint8_t *message, uint8_t nBytes)
