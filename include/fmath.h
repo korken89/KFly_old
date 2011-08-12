@@ -10,6 +10,7 @@ float fInvSqrt(float);
 void ftoa(float);
 float fabs(float);
 float fArctan2(float, float);
+uint16_t fix16Mul(uint16_t, uint16_t);
 uint8_t ksizeof(char *);
 
 #endif

@@ -88,13 +88,14 @@ void UART0_SetReceivedIRQHandler(voidfunctype func)
 
 void UART0_SendData(uint8_t *data, uint8_t size)
 {
-	/* write a byte into FIFO */
+	// Copy the data to the buffer
 	for (uint8_t i = 0; i < size; i++)
 	{
 		fifo[wr] = *(data +i);
 		wr = (wr + 1) % FIFOBUFSIZE;
 	}
 	
+	// If there is no current send-procedure running send a byte to get it started
 	if (fifoSending == FALSE)
 	{
 		fifoSending = TRUE;
@@ -105,7 +106,7 @@ void UART0_SendData(uint8_t *data, uint8_t size)
 
 void UART0_SendFIFO(void)
 {
-	/* Read byte from FIFO and send it */
+	// Read byte from FIFO and send it
 	if (rd != wr)
 	{
 		UART0_SendChar(fifo[rd]);

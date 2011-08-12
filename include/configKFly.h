@@ -3,7 +3,7 @@
 #define PITCH_CHANNEL		2
 #define ROLL_CHANNEL		3
 #define YAW_CHANNEL			0
-#define CHANNELMASK			((1<<THROTTLE_CHANNEL)|(1<<PITCH_CHANNEL)|(1<<ROLL_CHANNEL)|(1<<YAW_CHANNEL))
+#define CHANNELMASK			(0x0F)
 
 // Safeguards so the regulator won't overflow
 #define PID_IMAX		20.0f
