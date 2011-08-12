@@ -78,8 +78,8 @@ void CheckCRC(void)
 void rxPing(void)
 {
 	UART0_SetIRQHandler(rxWait);
-	uint8_t msg[] = {ACK, 0};
-	UART0_SendChar(ACK);
+	uint8_t msg[] = {1, 0};
+	UART0_SendChar(1);
 	UART0_SendChar(0);
 	UART0_SendChar(crc8(msg, 2));
 }

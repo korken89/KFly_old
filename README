@@ -16,11 +16,15 @@ CHKSUM: 8-bit CRC
 -: Commands :-
 Value	Description (from computer POV)
 -------------------------------------------
-0x01	Ping/Pong
-0x02	Get regulator data		
-0x03	Set regulator data
-0x04	Get channel mixing
-0x05	Set channel mixing
-0x06	Calibrate RC-inputs
-0x07	Get RC calibrated data
-0x08	Get RC values
+0x01	Ping 
+0x02	SaveToFlash
+0x03	GetRegulatorData
+0x04	SetRegulatorData
+0x05	GetChannelMix
+0x06	SetChannelMix
+0x07	SartRCCalibration
+0x08	StopRCCalibration
+0x09	CalibrateRCCenters
+0x0A	GetRCCalibration
+0x0B	SetRCCalibration
+0x0C	GetRCValues
