@@ -8,6 +8,7 @@
 #include "uart.h"
 #include "pwm.h"
 #include "fmath.h"
+#include "eemul.h"
 
 
 typedef struct {
@@ -26,6 +27,7 @@ typedef struct {
 } mix_data;
 
 void InitPID(pid_data *, uint8_t);
+void InitMixer(void);
 fix32 PIDUpdateChannel(pid_data *, kalman_data *, uint8_t);
 fix32 PIDUpdateYaw(pid_data *, float);
 void UpdOutputs(kalman_data *, kalman_data *, float, pid_data *, pid_data *, pid_data *);

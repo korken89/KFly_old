@@ -5,6 +5,7 @@
 #include "bitvals.h"
 #include "timer.h"
 #include "leds.h"
+#include "lpc_types.h"
 
 #define INT_CH1		4
 #define INT_CH2		5
@@ -17,7 +18,7 @@
 
 typedef struct
 {
-	int16_t ch[6];		// Channel values
+	int16_t ch[8];		// Channel values
 } input_data;
 
 void EINT_Init(void); 

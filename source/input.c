@@ -5,22 +5,21 @@ volatile input_calibration sInputCalibration;
 
 void vInitInputs(void)
 {
-	// Fattigmanskalibrering!
-	sInputCalibration.ch_bottom[0] = 989;
-	sInputCalibration.ch_bottom[1] = 989;
-	sInputCalibration.ch_bottom[2] = 989;
-	sInputCalibration.ch_bottom[3] = 989;
-	
-	sInputCalibration.ch_center[0] = 1502;
-	sInputCalibration.ch_center[1] = 1506;
-	sInputCalibration.ch_center[2] = 989;
-	sInputCalibration.ch_center[3] = 1519;
-	
-	sInputCalibration.ch_top[0] = 2012;
-	sInputCalibration.ch_top[1] = 2012;
-	sInputCalibration.ch_top[2] = 2012;
-	sInputCalibration.ch_top[3] = 2012;
-	
+	if (EEMUL_DATA->ID == KFLY_ID)
+	{
+		
+	}
+	else
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			sInputCalibration.ch_bottom[i] = 1000;
+			sInputCalibration.ch_center[i] = 1500;
+			sInputCalibration.ch_top[i] = 2000;
+		}
+
+		sInputCalibration.ch_center[2] = 1000;	// Channel 3 is throttle
+	}	
 	
 	EINT_Init();
 	sInputData = EINT_GetPointerToValues();
@@ -32,7 +31,7 @@ void vInitInputs(void)
  * Bit 0 = Channel 1
  * Bit 1 = Cahnnel 2
  * 		...
- * Bit 5 = Channel 6
+ * Bit 7 = Channel 8
  * 
  * Bit Cleared = Normal Operation
  * Bit Set = No Connection
@@ -40,7 +39,7 @@ void vInitInputs(void)
 uint8_t GetInputStatus(void)
 {
 	uint8_t status;
-	for (uint8_t i = 0; i < 6; i++)
+	for (uint8_t i = 0; i < 8; i++)
 	{
 		if (GetRawInputLevel(i) == 0)
 			status |= (1<<i);

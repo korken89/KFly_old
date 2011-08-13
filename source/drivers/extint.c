@@ -2,6 +2,7 @@
 
 volatile input_data sData;
 volatile uint8_t check = 0;
+volatile Bool PWMorCPPM = FALSE;
 
 void EINT_Init(void)	
 { 
@@ -16,7 +17,7 @@ void EINT_Init(void)
 	LPC_GPIOINT->IO0IntEnR = INTMASK;		// Enable interrupts on P0[4-9] at falling and rising edge
 	LPC_GPIOINT->IO0IntEnF = INTMASK;		//
 	
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 8; i++)
 		sData.ch[i] = 0;			// All inputs to zero
 	
 	//sDataLocation = &sData;
@@ -36,37 +37,50 @@ void EINT_NoConnectionCheck(void)
 	if (check == 0)
 		check++;
 	else if (check > 0)
-		for (uint8_t i = 0; i < 6; i++)
+		for (uint8_t i = 0; i < 8; i++)
 				sData.ch[i] = 0;	
 }
 
 void EINT3_IRQHandler (void)	
 {	
-	static uint32_t temp[6] = {0, 0, 0, 0, 0, 0};			// Temporary measurement data
-	static uint32_t nocon[6] = {0, 0, 0, 0, 0, 0};			// Time since last input
+	static uint32_t temp[8] = {0, 0, 0, 0, 0, 0};			// Temporary measurement data (PWM and CPPM mode)
+	static uint32_t nocon[6] = {0, 0, 0, 0, 0, 0};			// Time since last input (PWM mode)
+	static Bool sync = FALSE;								// Sync period for CPPM
 	
 	uint32_t statF = LPC_GPIOINT->IO0IntStatF & INTMASK;	// Get status on all falling edge interrupts
 	uint32_t statR = LPC_GPIOINT->IO0IntStatR & INTMASK;	// Get status on all rising edge interrupts
-	LPC_GPIOINT->IO0IntClr = statF|statR;					// Clear occured interrupts
+	LPC_GPIOINT->IO0IntClr = (statF|statR);					// Clear occured interrupts
 	
 	uint32_t Ticks = GetTickCount();
 	check = 0;
 	
-	/**
-	 * 	Channel 1 - 6 measurement
-	 **/
-	
-	for (uint8_t i = 0; i < 6; i++)
+	if (PWMorCPPM == TRUE)
 	{
-		if (statR & (1<<(INT_CH1 +i))) 				/* Code for Rising edge of Channel 1-6 */
-			temp[i] = Ticks;
+		/**
+		 * 	Channel 1 - 8 measurement in CPPM mode
+		 * 	Input 1 is CPPM and input 2 is RSSI
+		 **/
+		 
+		 
+	}
+	else
+	{
+		/**
+		 * 	Channel 1 - 6 measurement in PWM mode
+		 **/
 		
-		else if (statF & (1<<(INT_CH1 +i)))			/* Code for Falling edge of Channel 1-6 */
+		for (uint8_t i = 0; i < 6; i++)
 		{
-			sData.ch[i] = Ticks - temp[i];			// Calculate
-			nocon[i] = Ticks;
+			if (statR & (1<<(INT_CH1 +i))) 				/* Code for Rising edge of Channel 1-6 */
+				temp[i] = Ticks;
+			
+			else if (statF & (1<<(INT_CH1 +i)))			/* Code for Falling edge of Channel 1-6 */
+			{
+				sData.ch[i] = Ticks - temp[i];			// Calculate
+				nocon[i] = Ticks;
+			}
+			else if ((Ticks - nocon[i]) > 200000)
+				sData.ch[i] = 0;
 		}
-		else if ((Ticks - nocon[i]) > 200000)
-			sData.ch[i] = 0;
 	}
 }

@@ -19,14 +19,14 @@ void main( void )
 				200,
 				NULL,
 				2,
-				NULL);
+				NULL);*/
 				
 	xTaskCreate(vTaskArmDisarm,
 				"Arm/Disarm",
 				80,
 				NULL,
 				1,
-				NULL);*/
+				NULL);
 	
 	/* Start the scheduler. */
 	vTaskStartScheduler();
@@ -137,7 +137,7 @@ void vTaskArmDisarm(void *pvParameters)
 			clearLED(2);
 		}
 		
-		if ((GetInputLevel(THROTTLE_CHANNEL) > 0.1f) && (EnginesArmed() == TRUE))
+		if ((GetInputLevel(THROTTLE_CHANNEL) > (fix32)(0.1f*FP_MUL)) && (EnginesArmed() == TRUE))
 		{
 			PIDArm();
 			setLED(2);
@@ -155,7 +155,7 @@ void vTaskArmDisarm(void *pvParameters)
 			ArmEngines();
 			setLED(1);
 		}
-		else if ((GetInputLevel(THROTTLE_CHANNEL) < 0.05f) && (GetInputLevel(YAW_CHANNEL) < -0.95f))
+		else if ((GetInputLevel(THROTTLE_CHANNEL) < (fix32)(0.05f*FP_MUL)) && (GetInputLevel(YAW_CHANNEL) > (fix32)(0.95f*FP_MUL)))
 			arm_counter++;
 		else
 			arm_counter = 0;
@@ -167,7 +167,7 @@ void vTaskArmDisarm(void *pvParameters)
 			DisarmEngines();
 			clearLED(1);
 		}
-		else if ((GetInputLevel(THROTTLE_CHANNEL) < 0.05f) && (GetInputLevel(YAW_CHANNEL) > 0.95f))
+		else if ((GetInputLevel(THROTTLE_CHANNEL) < (fix32)(0.05f*FP_MUL)) && (GetInputLevel(YAW_CHANNEL) < (fix32)(-0.95f*FP_MUL)))
 			disarm_counter++;
 		else
 			disarm_counter = 0;

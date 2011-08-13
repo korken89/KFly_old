@@ -6,12 +6,13 @@
 #include "extint.h"
 #include "timer.h"
 #include "fmath.h"
+#include "eemul.h"
 
 typedef struct
 {
-	int16_t ch_center[6];
-	int16_t ch_top[6];
-	int16_t ch_bottom[6];
+	int16_t ch_center[8];
+	int16_t ch_top[8];
+	int16_t ch_bottom[8];
 } input_calibration;
 
 void vInitInputs(void);

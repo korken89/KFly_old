@@ -9,24 +9,119 @@ void InitPID(pid_data *PID, uint8_t channel)
 	PID->a_iState = 0;
 	PID->r_iState = 0;
     
-    //Fattigmanskalibrering!
-	if ((channel == ROLL_CHANNEL) || (channel == PITCH_CHANNEL))
+	if (channel == ROLL_CHANNEL)
     {
-		PID->r_kp = (fix32)(2.0f*FP_MUL);
-		PID->r_ki = (fix32)(2.0f*FP_MUL);
-		
-		PID->a_kp = (fix32)(0.6f*FP_MUL);
-		PID->a_ki = (fix32)(0.0f*FP_MUL);
+		if (EEMUL_DATA->ID == KFLY_ID)
+		{
+			PID->r_kp = (fix32)EEMUL_DATA->ROLL_R_KP;
+			PID->r_ki = (fix32)EEMUL_DATA->ROLL_R_KI;
+			
+			PID->a_kp = (fix32)EEMUL_DATA->ROLL_A_KP;
+			PID->a_ki = (fix32)EEMUL_DATA->ROLL_A_KI;
+			
+			PID->r_imax = (fix32)EEMUL_DATA->ROLL_R_IMAX;
+			PID->a_imax = (fix32)EEMUL_DATA->ROLL_A_IMAX;
+		}
+		else
+		{	
+			PID->r_kp = (fix32)(2.0f*FP_MUL);
+			PID->r_ki = (fix32)(0.0f*FP_MUL);
+			
+			PID->a_kp = (fix32)(0.6f*FP_MUL);
+			PID->a_ki = (fix32)(0.0f*FP_MUL);
+			
+			PID->r_imax = (fix32)(50.0f*FP_MUL);
+			PID->a_imax = (fix32)(50.0f*FP_MUL);
+		}
 	}
 	
-	if (channel == YAW_CHANNEL)
+	else if (channel == PITCH_CHANNEL)
     {
-		PID->r_kp = (fix32)(2.0f*FP_MUL);
-		PID->r_ki = (fix32)(0.0f*FP_MUL);
-		
-		PID->a_kp = (fix32)(0.0f*FP_MUL);
-		PID->a_ki = (fix32)(0.0f*FP_MUL);
+		if (EEMUL_DATA->ID == KFLY_ID)
+		{
+			PID->r_kp = (fix32)EEMUL_DATA->PITCH_R_KP;
+			PID->r_ki = (fix32)EEMUL_DATA->PITCH_R_KI;
+			
+			PID->a_kp = (fix32)EEMUL_DATA->PITCH_A_KP;
+			PID->a_ki = (fix32)EEMUL_DATA->PITCH_A_KI;
+			
+			PID->r_imax = (fix32)EEMUL_DATA->PITCH_R_IMAX;
+			PID->a_imax = (fix32)EEMUL_DATA->PITCH_A_IMAX;
+		}
+		else
+		{	
+			PID->r_kp = (fix32)(2.0f*FP_MUL);
+			PID->r_ki = (fix32)(0.0f*FP_MUL);
+			
+			PID->a_kp = (fix32)(0.6f*FP_MUL);
+			PID->a_ki = (fix32)(0.0f*FP_MUL);
+			
+			PID->r_imax = (fix32)(50.0f*FP_MUL);
+			PID->a_imax = (fix32)(50.0f*FP_MUL);
+		}
+	}
+	
+	else if (channel == YAW_CHANNEL)
+    {
+		if (EEMUL_DATA->ID == KFLY_ID)
+		{
+			PID->r_kp = (fix32)EEMUL_DATA->YAW_R_KP;
+			PID->r_ki = (fix32)EEMUL_DATA->YAW_R_KI;
+			
+			PID->a_kp = (fix32)EEMUL_DATA->YAW_A_KP;
+			PID->a_ki = (fix32)EEMUL_DATA->YAW_A_KI;
+			
+			PID->r_imax = (fix32)EEMUL_DATA->YAW_R_IMAX;
+			PID->a_imax = (fix32)EEMUL_DATA->YAW_A_IMAX;
+		}
+		else
+		{	
+			PID->r_kp = (fix32)(2.0f*FP_MUL);
+			PID->r_ki = (fix32)(0.0f*FP_MUL);
+			
+			PID->a_kp = (fix32)(0.6f*FP_MUL);
+			PID->a_ki = (fix32)(0.0f*FP_MUL);
+			
+			PID->r_imax = (fix32)(50.0f*FP_MUL);
+			PID->a_imax = (fix32)(50.0f*FP_MUL);
+		}
 	}	
+}
+
+void InitMixer(void)
+{
+	if (EEMUL_DATA->ID == KFLY_ID)
+	{
+		for (int j = 0; j < 4; j++)
+			mixer.mix[0][j] = (fix8)EEMUL_DATA->MIX_CH1[j];
+			
+		for (int j = 0; j < 4; j++)
+			mixer.mix[1][j] = (fix8)EEMUL_DATA->MIX_CH2[j];
+			
+		for (int j = 0; j < 4; j++)
+			mixer.mix[2][j] = (fix8)EEMUL_DATA->MIX_CH3[j];
+			
+		for (int j = 0; j < 4; j++)
+			mixer.mix[3][j] = (fix8)EEMUL_DATA->MIX_CH4[j];
+			
+		for (int j = 0; j < 4; j++)
+			mixer.mix[4][j] = (fix8)EEMUL_DATA->MIX_CH5[j];
+			
+		for (int j = 0; j < 4; j++)
+			mixer.mix[5][j] = (fix8)EEMUL_DATA->MIX_CH6[j];
+		
+		for (int j = 0; j < 4; j++)
+			mixer.mix[6][j] = (fix8)EEMUL_DATA->MIX_CH7[j];
+			
+		for (int j = 0; j < 4; j++)
+			mixer.mix[7][j] = (fix8)EEMUL_DATA->MIX_CH8[j];
+	}
+	else
+	{	
+		for (int i = 0; i < 8; i++)
+			for (int j = 0; j < 4; j++)
+				mixer.mix[i][j] = 0;
+	}
 }
 
 fix32 PIDUpdateChannel(pid_data *PID, kalman_data *data, uint8_t channel)
@@ -98,7 +193,7 @@ void UpdOutputs(kalman_data *data_xz, kalman_data *data_yz, float gyro_tmp, \
 			
 			thr_base = fix32Mul(MAX_PWM, GetInputLevel(THROTTLE_CHANNEL));
 			
-			for (int i = 0; i < 8; i++)		// Manual fixed point multiplication
+			for (int i = 0; i < 8; i++)		// Manual fixed point multiplication and FP to INT
 			{
 				PWM_setOutput((int)(thr_base*mixer.mix[i][0] + pid_pitch*mixer.mix[i][1] + \
 								pid_roll*mixer.mix[i][2] + pid_yaw*mixer.mix[i][3])/(256*128), i);

@@ -1,9 +1,9 @@
 // KFly ID
-#define FLY_ID			0x4B466C79 // KFly string as hex
+#define KFLY_ID			0x4B466C79 // KFly string as hex
 
 // Input channels
-#define THROTTLE_CHANNEL	1
-#define PITCH_CHANNEL		2
+#define THROTTLE_CHANNEL	2
+#define PITCH_CHANNEL		1
 #define ROLL_CHANNEL		3
 #define YAW_CHANNEL			0
 #define CHANNELMASK			(0x0F)
