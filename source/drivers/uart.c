@@ -7,6 +7,11 @@
 
 #include "uart.h"
 
+void UART0_SendChar(uint8_t);
+void UART0_SendString(uint8_t *);
+uint8_t UART0_CharReady(void);
+void UART0_SendFIFO(void);
+
 voidfunctype ReceivedHandlerFunction = NULL;
 
 volatile unsigned char fifo[FIFOBUFSIZE];
@@ -113,9 +118,7 @@ void UART0_SendFIFO(void)
 		rd = (rd + 1) % FIFOBUFSIZE;
 	}
 	else
-	{
 		fifoSending = FALSE;
-	}
 }
 
 void UART0_IRQHandler(void)
@@ -123,9 +126,8 @@ void UART0_IRQHandler(void)
 	uint32_t status = ((LPC_UART0->IIR >> 1) & 0x07);
 	
 	if (status == 1)		// Character sent interrupt
-	{
 		UART0_SendFIFO();
-	}
+	
 	else if (status == 2)	// Character recieved interrupt
 	{
 		if (ReceivedHandlerFunction != NULL)

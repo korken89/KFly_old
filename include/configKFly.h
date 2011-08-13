@@ -1,3 +1,6 @@
+// KFly ID
+#define FLY_ID			0x4B466C79 // KFly string as hex
+
 // Input channels
 #define THROTTLE_CHANNEL	1
 #define PITCH_CHANNEL		2
@@ -5,18 +8,13 @@
 #define YAW_CHANNEL			0
 #define CHANNELMASK			(0x0F)
 
-// Safeguards so the regulator won't overflow
-#define PID_IMAX		20.0f
-#define PID_IMIN		-PID_IMAX
-
 // Maximum angle of the aircraft in stability mode (in deg)
-#define MAX_ANGLE		35.0f	// 35 deg max
+#define MAX_ANGLE		35.0f
 
 // Maximum angular rate of the aircraft in acrobatic mode (in deg/s)
-#define MAX_RATE		180.0f	// 180 deg/s max
-#define MIN_RATE		-MAX_RATE
+#define MAX_RATE		180.0f
 
-// Maximum angular rate of the aircraft in Yaw
+// Maximum angular rate of the aircraft in Yaw (in deg/s)
 #define MAX_YAW_RATE	90.0f
 
 // Update rate for all regulators and filters in Hz

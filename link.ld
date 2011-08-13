@@ -8,7 +8,6 @@ MEMORY
 }
 
 ENTRY(Reset_Handler)
-PROVIDE(_EEMUL_START = 0x7800);
 
 SECTIONS
 {
@@ -19,7 +18,7 @@ SECTIONS
 	. = ALIGN(4);
 	PROVIDE(_DATA_FLASH_START = .);
   } >FLASH
-	
+  
   .stackarea : {
 	*(.stackarea)
   } >SRAM

@@ -6,20 +6,20 @@ volatile input_calibration sInputCalibration;
 void vInitInputs(void)
 {
 	// Fattigmanskalibrering!
-	sInputCalibration.ch_bottom[0] = 1017;
-	sInputCalibration.ch_bottom[1] = 1074;
-	sInputCalibration.ch_bottom[2] = 1063;
-	sInputCalibration.ch_bottom[3] = 1078;
+	sInputCalibration.ch_bottom[0] = 989;
+	sInputCalibration.ch_bottom[1] = 989;
+	sInputCalibration.ch_bottom[2] = 989;
+	sInputCalibration.ch_bottom[3] = 989;
 	
-	sInputCalibration.ch_center[0] = 1498;
-	sInputCalibration.ch_center[1] = 1074;
-	sInputCalibration.ch_center[2] = 1501;
-	sInputCalibration.ch_center[3] = 1508;
+	sInputCalibration.ch_center[0] = 1502;
+	sInputCalibration.ch_center[1] = 1506;
+	sInputCalibration.ch_center[2] = 989;
+	sInputCalibration.ch_center[3] = 1519;
 	
-	sInputCalibration.ch_top[0] = 1947;
-	sInputCalibration.ch_top[1] = 1752;
-	sInputCalibration.ch_top[2] = 1870;
-	sInputCalibration.ch_top[3] = 1967;
+	sInputCalibration.ch_top[0] = 2012;
+	sInputCalibration.ch_top[1] = 2012;
+	sInputCalibration.ch_top[2] = 2012;
+	sInputCalibration.ch_top[3] = 2012;
 	
 	
 	EINT_Init();
@@ -107,46 +107,43 @@ void SaveCalibratedDataToFlashBuffer(void)
 }
 
 /**
- * Returns the current RC stick position with bias compensation
- * in the format (-1.0 ... 0.0 ... 1.0) as (MIN ... MID ... MAX).
- * If MID = MAX or MIN then it will become:
- * (0.0 ... 1.0) as (MID ... MAX) and (-1.0 ... 0.0) as (MIN ... MID)
+ * Returns the current RC stick position with bias compensation in 24.8-bit signed fixed point.
  **/
-float GetInputLevel(uint8_t channel)
+fix32 GetInputLevel(uint8_t channel)
 {
 	if (GetRawInputLevel(channel) == 0)
-		return 0.0f;
+		return 0;
 	
-	int16_t level = (int16_t)GetRawInputLevel(channel) - (int16_t)sInputCalibration.ch_center[channel];
-	float temp;
+	fix32 level = (fix32)(((int32_t)GetRawInputLevel(channel) - (int32_t)sInputCalibration.ch_center[channel])*FP_MUL);
+	fix32 temp;
 	
-	if (level > 0.0f)
+	if (level > 0)
 	{
 		if (sInputCalibration.ch_center[channel] == sInputCalibration.ch_top[channel])
-			return 0.0f;
+			return 0;
 		
-		temp = (float)level/(float)(sInputCalibration.ch_top[channel] - sInputCalibration.ch_center[channel]);
+		temp = level/(fix32)(sInputCalibration.ch_top[channel] - sInputCalibration.ch_center[channel]);
 		
-		if (temp > 1.0f)	// Just in case something has happened
-			return 1.0f;
+		if (temp > 1*FP_MUL)	// Just in case something has happened
+			return 1*FP_MUL;
 		else 
 			return temp;
 	}
 		
-	else if (level < 0.0f)
+	else if (level < 0)
 	{
 		if (sInputCalibration.ch_center[channel] == sInputCalibration.ch_bottom[channel])
-			return 0.0f;
+			return 0;
 		
-		temp = (float)level/(float)(sInputCalibration.ch_center[channel] - sInputCalibration.ch_bottom[channel]);
+		temp = level/(fix32)(sInputCalibration.ch_center[channel] - sInputCalibration.ch_bottom[channel]);
 		
-		if (temp < -1.0f)	// Just in case something has happened
-			return -1.0f;
+		if (temp < -1*FP_MUL)	// Just in case something has happened
+			return -1*FP_MUL;
 		else 
 			return temp;
 	}
 	else
-		return 0.0f;	
+		return 0;	
 }
 
 /**

@@ -5,14 +5,14 @@
 #include "task.h"
 #include "extint.h"
 #include "timer.h"
+#include "fmath.h"
 
-struct _input_calibration
+typedef struct
 {
 	int16_t ch_center[6];
 	int16_t ch_top[6];
 	int16_t ch_bottom[6];
-};
-typedef struct _input_calibration input_calibration;
+} input_calibration;
 
 void vInitInputs(void);
 uint8_t GetInputStatus(void);
@@ -20,7 +20,7 @@ void ResetCalibration(void);
 void CalibrateInputLevels(void);
 void CalibrateCenterLevels(void);
 void SaveCalibratedDataToFlashBuffer(void);		
-float GetInputLevel(uint8_t);
+fix32 GetInputLevel(uint8_t);
 uint16_t GetRawInputLevel(uint8_t);
 
 #endif

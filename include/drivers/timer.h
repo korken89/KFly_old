@@ -5,6 +5,7 @@
 #include "bitvals.h"
 #include "extint.h"
 #include "uart.h"
+#include "fmath.h"
 
 #define GetTickCount() 	LPC_TIM1->TC
 

@@ -23,20 +23,23 @@ void ftoa(float a)
 {
 	if (a < 0)
 	{
-		UART0_SendChar('-');
+		UART0_SendData("-", 1);
 		a = -a;
 	}
 	
 	int heltal = (int)a;
 	int decimal = (int)((a-(float)heltal)*1000);
 	char *temp;
-	temp = itoa(decimal,10);
-	UART0_SendString(itoa(heltal,10));
+	temp = itoa(heltal, 10);
+	UART0_SendData(temp, ksizeof(temp));
+	UART0_SendData(".", 1);
 	
-	UART0_SendChar('.');
+	temp = itoa(decimal, 10);
 	for (uint8_t i = 3 - ksizeof(temp); i>0; i--)
-		UART0_SendChar('0');
-	UART0_SendString(temp);
+	{
+		UART0_SendData("0", 1);
+	}
+	UART0_SendData(temp, ksizeof(temp));
 }
 
 float fabs(float num)
@@ -65,11 +68,15 @@ float fArctan2(float y, float x)
 		angle = coeff_2 - coeff_1 * r;
 	}
 
-
 	if (y < 0)
 		return -angle;     // negate if in quad III or IV
 	else
 		return angle;
+}
+
+fix32 fix32Mul(fix32 a, fix32 b)
+{
+	return ((a * b)/FP_MUL);
 }
 
 uint8_t ksizeof(char *string)

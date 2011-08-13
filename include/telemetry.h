@@ -10,6 +10,7 @@
 void startTelemetry(void);
 void stopTelemetry(void);
 void rxWait(void);
+void rxNothing(void);
 void rxPing(void);
 void rxSaveToFlash(void);
 void GetDataCount(void);

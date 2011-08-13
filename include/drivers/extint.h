@@ -15,11 +15,10 @@
 
 #define INTMASK 	((1<<INT_CH1)|(1<<INT_CH2)|(1<<INT_CH3)|(1<<INT_CH4)|(1<<INT_CH5)|(1<<INT_CH6))
 
-struct _input_data
+typedef struct
 {
 	int16_t ch[6];		// Channel values
-};
-typedef struct _input_data input_data;
+} input_data;
 
 void EINT_Init(void); 
 input_data *EINT_GetPointerToValues(void);

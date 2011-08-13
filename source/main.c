@@ -7,14 +7,14 @@ void main( void )
 	prvSetupHardware();
 
 	/* Load Tasks */
-	/*xTaskCreate(vTask1,
+	xTaskCreate(vTask1,
 				"Blink",
 				80,
 				NULL,
 				1,
-				NULL);*/
+				NULL);
 				
-	xTaskCreate(vTaskControlLoop,
+	/*xTaskCreate(vTaskControlLoop,
 				"Control",
 				200,
 				NULL,
@@ -26,7 +26,7 @@ void main( void )
 				80,
 				NULL,
 				1,
-				NULL);
+				NULL);*/
 	
 	/* Start the scheduler. */
 	vTaskStartScheduler();
@@ -59,30 +59,28 @@ void prvSetupHardware( void )
 
 void vTask1(void *pvParameters)
 {
-	uint8_t ch = 'T';
+	char *str;
+	
 	while (1)
 	{
-		if (UART0_CharReady())
-			ch = UART0_GetChar();
-		
-		if (ch == 'B')
+		for (int i = 0; i < 4; i++)
 		{
-			PWM_setOutput(0, 1);
-			PWM_setOutput(0, 2);
-			PWM_setOutput(0, 3);
+			int level = GetInputLevel(i);
 			
-			clearLED(1);
-			clearLED(2);
+			if (level < 0)
+			{
+				level = -level;
+				UART0_SendData("-", 1);
+			}
+			
+			str = itoa(level, 10);
+			
+			UART0_SendData(str, ksizeof(str));
+			UART0_SendData("\t", 1);
 		}
-		else if (ch == 'T')
-		{
-			PWM_setOutput(1000, 1);
-			PWM_setOutput(1000, 2);
-			PWM_setOutput(1000, 3);			
-
-			setLED(1);
-			setLED(2);
-		}
+		UART0_SendData("\n", 1);
+		
+		vTaskDelay(100 / portTICK_RATE_MS);
 	}
 }
 
@@ -92,20 +90,18 @@ void vTaskControlLoop(void *pvParameters)
 	
 	static float acc_tmp[2];
 	static float gyro_tmp[3];
-	static float pid_tmp[3];
-	static float thr_base, thr_raw;
 	
 	static kalman_data data_xz;
 	static kalman_data data_yz;
 	
-	static pid_data data_roll;
 	static pid_data data_pitch;
+	static pid_data data_roll;
 	static pid_data data_yaw;
 	
 	InitKalman(&data_xz);
 	InitKalman(&data_yz);
-	InitPID(&data_roll, ROLL_CHANNEL);
 	InitPID(&data_pitch, PITCH_CHANNEL);
+	InitPID(&data_roll, ROLL_CHANNEL);
 	InitPID(&data_yaw, YAW_CHANNEL);
 	
 	while (1)
@@ -116,41 +112,8 @@ void vTaskControlLoop(void *pvParameters)
 		UpdKalman(&data_xz, acc_tmp[0], gyro_tmp[0]);
 		UpdKalman(&data_yz, acc_tmp[1], gyro_tmp[1]);
 		
-		if (EnginesArmed() == TRUE)
-		{
-			if (PIDArmed() == TRUE)
-			{
-				pid_tmp[0] = PIDUpdateChannel(&data_pitch, &data_xz, PITCH_CHANNEL);
-				pid_tmp[1] = PIDUpdateChannel(&data_roll, &data_yz, ROLL_CHANNEL);
-				pid_tmp[2] = PIDUpdateYaw(&data_yaw, gyro_tmp[2]);
-			}
-			
-			thr_raw = GetInputLevel(THROTTLE_CHANNEL);
-			
-			if (thr_raw > 0.05f)
-			{
-				thr_base = ((float)MAX_PWM*0.9f)*thr_raw;
-			
-				// Pitch base throttle and differential throttle
-				PWM_setOutput((int)(thr_base + pid_tmp[0] + pid_tmp[2]), 0);
-				PWM_setOutput((int)(thr_base - pid_tmp[0] + pid_tmp[2]), 1);
-				
-				// Roll base throttle and differential throttle
-				PWM_setOutput((int)(thr_base + pid_tmp[1] - pid_tmp[2]), 2);
-				PWM_setOutput((int)(thr_base - pid_tmp[1] - pid_tmp[2]), 3);
-			}
-			else
-			{
-				for (uint8_t i = 0; i < 6; i++)
-					PWM_setOutput(MAX_PWM/15, i);
-			}
-		}
-		else
-		{
-			for (uint8_t i = 0; i < 6; i++)
-				PWM_setOutput(0, i);
-		}
-
+		UpdOutputs(&data_xz, &data_yz, gyro_tmp[3], &data_pitch, &data_roll, &data_yaw);
+		
 		vTaskDelayUntil(&xLastWakeTime, 5 / portTICK_RATE_MS);
 	}
 }
