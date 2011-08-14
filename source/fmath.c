@@ -76,7 +76,7 @@ float fArctan2(float y, float x)
 
 fix32 fix32Mul(fix32 a, fix32 b)
 {
-	return ((a * b)/FP_MUL);
+	return ((a * b)>>8);
 }
 
 uint8_t ksizeof(char *string)

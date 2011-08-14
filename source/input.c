@@ -1,7 +1,7 @@
 #include "input.h"
 
-volatile input_data *InputData;
-volatile input_calibration InputCalibration, TempCalibration;
+volatile static input_data *InputData;
+volatile static input_calibration InputCalibration, TempCalibration;
 
 void InitInputs(void)
 {
@@ -52,6 +52,14 @@ void InitInputs(void)
 		
 		InputCalibration.ch_center[2] = 1000;	// Channel 3 is throttle
 	}	
+	
+	// Copy data to TempCalibration
+	for (int i = 0; i < 8; i++)
+	{
+		TempCalibration.ch_bottom[i] = InputCalibration.ch_bottom[i];
+		TempCalibration.ch_center[i] = InputCalibration.ch_center[i];
+		TempCalibration.ch_top[i] = InputCalibration.ch_top[i];
+	}
 	
 	EINT_Init();
 	InputData = EINT_GetPointerToValues();

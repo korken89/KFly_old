@@ -1,8 +1,8 @@
 #include "extint.h"
 
-volatile input_data sData;
-volatile uint8_t check = 0;
-volatile Bool PWMorCPPM = FALSE;
+volatile static input_data sData;
+volatile static uint8_t check = 0;
+volatile static Bool PWMorCPPM = FALSE;
 
 void EINT_Init(void)	
 { 

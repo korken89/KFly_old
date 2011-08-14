@@ -17,7 +17,7 @@ extern void memcpy(int*, int*, int);
 
 extern void xPortSysTickHandler(void);
 extern void xPortPendSVHandler(void);
-extern void vPortSVCHandler( void );
+extern void vPortSVCHandler(void);
 
 void Reset_Handler(void);
 void Default_Handler(void);

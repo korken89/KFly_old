@@ -175,8 +175,8 @@ void UpdOutputs(kalman_data *data_xz, kalman_data *data_yz, float gyro_tmp, \
 			
 			for (int i = 0; i < 8; i++)		// Manual fixed point multiplication and FP to INT
 			{
-				PWM_setOutput((int)(thr_base*mixer.mix[i][0] + pid_pitch*mixer.mix[i][1] + \
-								pid_roll*mixer.mix[i][2] + pid_yaw*mixer.mix[i][3])/(256*128), i);
+				PWM_setOutput((int)((thr_base*mixer.mix[i][0] + pid_pitch*mixer.mix[i][1] + \
+								pid_roll*mixer.mix[i][2] + pid_yaw*mixer.mix[i][3]) >> 15), i);
 			}
 		}
 		
