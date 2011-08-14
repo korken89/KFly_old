@@ -1,10 +1,11 @@
 /* Data in EEPROM Emulation section
  * Data structure:
  * - ID:						1  word
+ * - Version:					6 words
  * - PID Data: 					24 words
- * - Mixers Data: 				32 words
+ * - Mixers Data: 				8 words
  * - Input Calibration Data:	25 words
- * Total size: 82 words
+ * Total size: 64 words = 256 bytes = 1 page
  * */
 
 #include "lpc_types.h"
@@ -15,8 +16,9 @@
 
 typedef struct
 {
-	// Save ID
+	// Save ID and Version (strings, 4 characters per word)
 	__I  uint32_t ID;
+	__I  uint32_t VER[6];
 	
 	/* --- START REGULATOR CONSTANTS --- */
 	// Pitch regulator Coefficients
@@ -45,42 +47,36 @@ typedef struct
 	/* --- END REGULATOR CONSTANTS --- */
 	
 	/* --- START MIXER CONSTANTS --- */
-	/* MIX_CHn[0] is Throttle Gain
-	 * MIX_CHn[1] is Pitch Gain
-	 * MIX_CHn[2] is Roll Gain
-	 * MIX_CHn[3] is Yaw Gain
+	/* MIX[n][0] is Throttle Gain
+	 * MIX[n][1] is Pitch Gain
+	 * MIX[n][2] is Roll Gain
+	 * MIX[n][3] is Yaw Gain
 	 */
-	__I  uint32_t MIX_CH1[4];
-	__I  uint32_t MIX_CH2[4];
-	__I  uint32_t MIX_CH3[4];
-	__I  uint32_t MIX_CH4[4];
-	__I  uint32_t MIX_CH5[4];
-	__I  uint32_t MIX_CH6[4];
-	__I  uint32_t MIX_CH7[4];
-	__I  uint32_t MIX_CH8[4];
+	__I  uint8_t MIX[8][4];
 	/* --- END MIXER CONSTANTS --- */
 	
 	/* --- START RC INPUT CAIBRATION CONSTANTS --- */
 	/* Role:
-	 * Bit 0-1 defines input channel for YAW
-	 * Bit 2-3 defines input channel for ROLL
-	 * Bit 4-5 defines input channel for PITCH
-	 * Bit 6-7 defines input channel for THROTTLE
+	 * Bit 0-1 defines input role for Channel 1
+	 * Bit 2-3 defines input role for Channel 2
+	 * Bit 4-5 defines input role for Channel 3
+	 * Bit 6-7 defines input role for Channel 4
+	 * If the two bits equals	0: Throttle
+	 * 							1: Pitch
+	 * 							2: Roll
+	 * 							3: Yaw
+	 * 
+	 * INPUTCAL[n][0] is Top
+	 * INPUTCAL[n][1] is Center
+	 * INPUTCAL[n][2] is Bottom
 	 */
-	__I  uint32_t ROLE;
-	__I  uint32_t INPUTCAL_CH1[3];
-	__I  uint32_t INPUTCAL_CH2[3];
-	__I  uint32_t INPUTCAL_CH3[3];
-	__I  uint32_t INPUTCAL_CH4[3];
-	__I  uint32_t INPUTCAL_CH5[3];
-	__I  uint32_t INPUTCAL_CH6[3];
-	__I  uint32_t INPUTCAL_CH7[3];
-	__I  uint32_t INPUTCAL_CH8[3];
+	__I  uint32_t INPUT_ROLE;
+	__I  uint32_t INPUTCAL[8][3];
 	/* --- END RC INPUT CAIBRATION CONSTANTS --- */
 	
 } EEMUL_TypeDef;
 
-#define EEMUL_BASE	(0x00078000UL)
+#define EEMUL_BASE	(0x00078000UL) 	// 29th sector
 #define EEMUL_DATA	((EEMUL_TypeDef *) EEMUL_BASE)
 
 #endif

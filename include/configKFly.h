@@ -1,11 +1,11 @@
 // KFly ID
 #define KFLY_ID			0x4B466C79 // KFly string as hex
 
-// Input channels
-#define THROTTLE_CHANNEL	2
-#define PITCH_CHANNEL		1
-#define ROLL_CHANNEL		3
-#define YAW_CHANNEL			0
+// Input channels (DO NOT CHANGE!)
+#define THROTTLE_CHANNEL	0
+#define PITCH_CHANNEL		2
+#define ROLL_CHANNEL		4
+#define YAW_CHANNEL			6
 #define CHANNELMASK			(0x0F)
 
 // Maximum angle of the aircraft in stability mode (in deg)

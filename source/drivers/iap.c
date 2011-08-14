@@ -16,6 +16,8 @@
 #define IAP_ROM_LOCATION				0x1FFF1FF1UL
 #define IAP_EXECUTE_CMD(a, b)			((void (*)())(IAP_ROM_LOCATION))(a, b)
 
+extern uint32_t SystemFrequency;
+
 /*****************************************************************************
 ** Function name:	u32IAP_PrepareSectors
 **

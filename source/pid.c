@@ -56,8 +56,8 @@ void InitPID(pid_data *PID, uint8_t channel)
 			PID->a_kp = (fix32)(0.6f*FP_MUL);
 			PID->a_ki = (fix32)(0.0f*FP_MUL);
 			
-			PID->r_imax = (fix32)(50.0f*FP_MUL);
-			PID->a_imax = (fix32)(50.0f*FP_MUL);
+			PID->r_imax = (fix32)(30.0f*FP_MUL);
+			PID->a_imax = (fix32)(30.0f*FP_MUL);
 		}
 	}
 	
@@ -82,8 +82,8 @@ void InitPID(pid_data *PID, uint8_t channel)
 			PID->a_kp = (fix32)(0.6f*FP_MUL);
 			PID->a_ki = (fix32)(0.0f*FP_MUL);
 			
-			PID->r_imax = (fix32)(50.0f*FP_MUL);
-			PID->a_imax = (fix32)(50.0f*FP_MUL);
+			PID->r_imax = (fix32)(30.0f*FP_MUL);
+			PID->a_imax = (fix32)(30.0f*FP_MUL);
 		}
 	}	
 }
@@ -92,29 +92,9 @@ void InitMixer(void)
 {
 	if (EEMUL_DATA->ID == KFLY_ID)
 	{
-		for (int j = 0; j < 4; j++)
-			mixer.mix[0][j] = (fix8)EEMUL_DATA->MIX_CH1[j];
-			
-		for (int j = 0; j < 4; j++)
-			mixer.mix[1][j] = (fix8)EEMUL_DATA->MIX_CH2[j];
-			
-		for (int j = 0; j < 4; j++)
-			mixer.mix[2][j] = (fix8)EEMUL_DATA->MIX_CH3[j];
-			
-		for (int j = 0; j < 4; j++)
-			mixer.mix[3][j] = (fix8)EEMUL_DATA->MIX_CH4[j];
-			
-		for (int j = 0; j < 4; j++)
-			mixer.mix[4][j] = (fix8)EEMUL_DATA->MIX_CH5[j];
-			
-		for (int j = 0; j < 4; j++)
-			mixer.mix[5][j] = (fix8)EEMUL_DATA->MIX_CH6[j];
-		
-		for (int j = 0; j < 4; j++)
-			mixer.mix[6][j] = (fix8)EEMUL_DATA->MIX_CH7[j];
-			
-		for (int j = 0; j < 4; j++)
-			mixer.mix[7][j] = (fix8)EEMUL_DATA->MIX_CH8[j];
+		for (int i = 0; i < 8; i++)
+			for (int j = 0; j < 4; j++)
+				mixer.mix[i][j] = (fix8)EEMUL_DATA->MIX[i][j];
 	}
 	else
 	{	

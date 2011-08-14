@@ -7,12 +7,12 @@ void main( void )
 	prvSetupHardware();
 
 	/* Load Tasks */
-	xTaskCreate(vTask1,
+	/*xTaskCreate(vTask1,
 				"Blink",
 				80,
 				NULL,
 				1,
-				NULL);
+				NULL);*/
 				
 	/*xTaskCreate(vTaskControlLoop,
 				"Control",
@@ -49,7 +49,7 @@ void prvSetupHardware( void )
 	//GPS_UART_Init();
 	PWM_Init();
 	I2C0_Init();
-	vInitInputs();
+	InitInputs();
 	Timer2_Init();
 	SystemInit();
 	__enable_irq();
@@ -59,26 +59,8 @@ void prvSetupHardware( void )
 
 void vTask1(void *pvParameters)
 {
-	char *str;
-	
 	while (1)
 	{
-		for (int i = 0; i < 4; i++)
-		{
-			int level = GetInputLevel(i);
-			
-			if (level < 0)
-			{
-				level = -level;
-				UART0_SendData("-", 1);
-			}
-			
-			str = itoa(level, 10);
-			
-			UART0_SendData(str, ksizeof(str));
-			UART0_SendData("\t", 1);
-		}
-		UART0_SendData("\n", 1);
 		
 		vTaskDelay(100 / portTICK_RATE_MS);
 	}

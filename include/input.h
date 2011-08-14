@@ -3,6 +3,7 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "configKFly.h"
 #include "extint.h"
 #include "timer.h"
 #include "fmath.h"
@@ -10,12 +11,13 @@
 
 typedef struct
 {
+	uint8_t role;
 	int16_t ch_center[8];
 	int16_t ch_top[8];
 	int16_t ch_bottom[8];
 } input_calibration;
 
-void vInitInputs(void);
+void InitInputs(void);
 uint8_t GetInputStatus(void);
 void ResetCalibration(void);
 void CalibrateInputLevels(void);
