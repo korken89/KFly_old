@@ -12,7 +12,7 @@ void UART0_SendString(uint8_t *);
 uint8_t UART0_CharReady(void);
 void UART0_SendFIFO(void);
 
-voidfunctype ReceivedHandlerFunction = NULL;
+PFV ReceivedHandlerFunction = NULL;
 
 volatile unsigned char fifo[FIFOBUFSIZE];
 volatile unsigned rd=0, wr=0;       /* read and write positions */
@@ -57,7 +57,6 @@ void UART_Init(void)
  */
 void UART0_SendChar(uint8_t ch)
 {
-	//while (!(LPC_UART0->LSR & (1<<5)));		// While transmitter is busy
 	LPC_UART0->THR = ch;
 }
 
@@ -86,7 +85,7 @@ uint8_t UART0_GetChar(void)
 	return (uint8_t)(LPC_UART0->RBR & 0xFF);		// Reciver status
 }
 
-void UART0_SetReceivedIRQHandler(voidfunctype func)
+void UART0_SetReceivedIRQHandler(PFV func)
 {
 	ReceivedHandlerFunction = func;
 }

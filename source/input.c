@@ -190,5 +190,5 @@ fix32 GetInputLevel(uint8_t channel)
 uint16_t GetRawInputLevel(uint8_t channel)
 {
 	channel = GetRoleChannel(channel);
-	return InputData->ch[channel];
+	return InputData->value[channel];
 }

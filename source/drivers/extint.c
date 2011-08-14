@@ -18,7 +18,7 @@ void EINT_Init(void)
 	LPC_GPIOINT->IO0IntEnF = INTMASK;		//
 	
 	for (int i = 0; i < 8; i++)
-		sData.ch[i] = 0;			// All inputs to zero
+		sData.value[i] = 0;			// All inputs to zero
 	
 	//sDataLocation = &sData;
 	Timer0_Init();
@@ -38,7 +38,7 @@ void EINT_NoConnectionCheck(void)
 		check++;
 	else if (check > 0)
 		for (uint8_t i = 0; i < 8; i++)
-				sData.ch[i] = 0;	
+				sData.value[i] = 0;	
 }
 
 void EINT3_IRQHandler (void)	
@@ -58,7 +58,7 @@ void EINT3_IRQHandler (void)
 	{
 		/**
 		 * 	Channel 1 - 8 measurement in CPPM mode
-		 * 	Input 1 is CPPM and input 2 is RSSI
+		 * 	Input 1 is CPPM and input 2 is RSSI (PWM)
 		 **/
 		 
 		 
@@ -76,11 +76,11 @@ void EINT3_IRQHandler (void)
 			
 			else if (statF & (1<<(INT_CH1 +i)))			/* Code for Falling edge of Channel 1-6 */
 			{
-				sData.ch[i] = Ticks - temp[i];			// Calculate
+				sData.value[i] = Ticks - temp[i];			// Calculate
 				nocon[i] = Ticks;
 			}
 			else if ((Ticks - nocon[i]) > 200000)
-				sData.ch[i] = 0;
+				sData.value[i] = 0;
 		}
 	}
 }

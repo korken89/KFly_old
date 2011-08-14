@@ -40,6 +40,10 @@ SECTIONS
 
   PROVIDE(__HEAP_START = _BSS_END);
   
+  .freertosstack : {
+	*(.freertosstack)
+  } >AHBRAM0
+  
   /* DWARF debug sections.
    * Symbols in the DWARF debugging sections are relative to
    * the beginning of the section so we begin them at 0.

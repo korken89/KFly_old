@@ -7,7 +7,7 @@ volatile static uint8_t counter;
 volatile static uint32_t data_rxerror = 0;
 volatile static uint32_t data_rxsuccess = 0;
 volatile static uint8_t CRC = 0;
-volatile voidfunctype parser = NULL;
+volatile PFV parser = NULL;
 
 void startTelemetry(void)
 {

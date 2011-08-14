@@ -18,7 +18,7 @@
 
 typedef struct
 {
-	int16_t ch[8];		// Channel values
+	int16_t value[8];		// Channel values
 } input_data;
 
 void EINT_Init(void); 

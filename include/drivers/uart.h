@@ -10,7 +10,7 @@
 
 void UART_Init(void);
 uint8_t UART0_GetChar(void);
-void UART0_SetReceivedIRQHandler(voidfunctype);
+void UART0_SetReceivedIRQHandler(PFV);
 void UART0_SendData(uint8_t *, uint8_t);
 void UART0_IRQHandler(void);
 

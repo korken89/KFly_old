@@ -200,9 +200,6 @@ typedef Bool BOOL_8;
  * @}
  */
 
-/** Void function pointer */
-typedef void (*voidfunctype)();
-
 #endif /* LPC_TYPES_H */
 
 /**
