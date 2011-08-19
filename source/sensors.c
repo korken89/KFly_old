@@ -4,6 +4,12 @@
 
 #include "sensors.h"
 
+void InitSensors(void)
+{
+	BMA180_Init(BW_300HZ, RANGE_2G);
+	ITG3200_Init();
+}
+
 void ReadAcc(float *data)
 {
 	uint8_t temp[6];

@@ -16,11 +16,12 @@
 /* KFly includes */
 #include "configKFly.h"
 
-/* Application includes */
+/* Init includes */
 #include "leds.h"
 #include "telemetry.h"
 #include "input.h"
 #include "misc.h"
+#include "sensors.h"
 
 void prvSetupHardware(void);
 void main(void);
