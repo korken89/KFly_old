@@ -37,13 +37,13 @@ void EINT_NoConnectionCheck(void)
 
 void EINT3_IRQHandler (void)	
 {	
-	static uint32_t temp[8] = {0, 0, 0, 0, 0, 0};			// Temporary measurement data (PWM and CPPM mode)
-	static uint32_t nocon[6] = {0, 0, 0, 0, 0, 0};			// Time since last input (PWM mode)
+	static int32_t temp[8] = {0, 0, 0, 0, 0, 0};			// Temporary measurement data (PWM and CPPM mode)
+	static int32_t nocon[6] = {0, 0, 0, 0, 0, 0};			// Time since last input (PWM mode)
 	static Bool sync = FALSE;								// Sync period for CPPM
 	
 	uint32_t statF = LPC_GPIOINT->IO0IntStatF & INTMASK;	// Get status on all falling edge interrupts
 	uint32_t statR = LPC_GPIOINT->IO0IntStatR & INTMASK;	// Get status on all rising edge interrupts
-	LPC_GPIOINT->IO0IntClr = (statF|statR);					// Clear occured interrupts
+	LPC_GPIOINT->IO0IntClr = (statF|statR);					// Clear ocured interrupts
 	
 	uint32_t Ticks = GetTickCount();
 	check = 0;

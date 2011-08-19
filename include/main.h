@@ -26,14 +26,10 @@
 //#include "gps.h"
 #include "sensors.h"
 #include "misc.h"
-#include "kalman.h"
-#include "pid.h"
 
 void prvSetupHardware(void);
 void main(void);
 void vTask1(void *);
-void vTaskControlLoop(void *);
-void vTaskArmDisarm(void *);
 void vConfigureTimerForRunTimeStats(void);
 
 #endif

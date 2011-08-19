@@ -47,7 +47,7 @@ typedef struct {
 } gyro_data;
 
 void ITG3200_Init(void);
-Status ITG3200_BurstRead(uint8_t *);
+Status ITG3200_BurstRead(uint8_t *, PFV);
 Status ITG3200_Read(uint8_t, uint8_t*);
 Status ITG3200_Write(uint8_t, uint8_t);
 

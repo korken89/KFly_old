@@ -317,7 +317,7 @@ error:
 	{
 		// Setup tx_rx data, callback and interrupt handler
 		tmp = I2C_getNum(I2Cx);
-		i2cdat[tmp].txrx_setup = (uint32_t) TransferCfg;
+		i2cdat[tmp].txrx_setup = (uint32_t)TransferCfg;
 		i2cdat[tmp].inthandler = I2C_MasterHandler;
 		
 		// Set direction phase, write first

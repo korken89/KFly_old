@@ -1,20 +1,16 @@
 #include "input.h"
 
+/** External Variables **/
 extern input_data InputData;
-volatile input_calibration InputCalibration, TempCalibration;
-volatile xTaskHandle xCalibrationTaskHandle;
-volatile static Bool CalibrateCenters = TRUE;
 
-/**
- * FreeRTOS Tasks go at the Top of the file
- **/
-void vTaskCalibrate(void *pvParameters)
-{
-	
-	while (1)
-	{
-	}
-}
+/** Public Globals **/
+volatile input_calibration TempCalibration;
+
+/** Private Globals **/
+volatile static input_calibration InputCalibration;
+volatile static Bool CalibrateCenters = TRUE;
+volatile static cal_state CalibrationState = NoCommand;
+volatile static xTaskHandle xCalibrationTaskHandle;
 
 void InitInputs(void)
 {
@@ -39,9 +35,9 @@ void InitInputs(void)
 		// Load calibration data
 		for (int i = 0; i < 8; i++)
 		{
-			InputCalibration.ch_bottom[i] = EEMUL_DATA->INPUTCAL[i][2];
-			InputCalibration.ch_center[i] = EEMUL_DATA->INPUTCAL[i][1];
 			InputCalibration.ch_top[i] = EEMUL_DATA->INPUTCAL[i][0];
+			InputCalibration.ch_center[i] = EEMUL_DATA->INPUTCAL[i][1];
+			InputCalibration.ch_bottom[i] = EEMUL_DATA->INPUTCAL[i][2];
 		}
 	}
 	else
@@ -58,9 +54,9 @@ void InitInputs(void)
 		
 		for (int i = 0; i < 8; i++)
 		{
-			InputCalibration.ch_bottom[i] = 1000;
-			InputCalibration.ch_center[i] = 1500;
 			InputCalibration.ch_top[i] = 2000;
+			InputCalibration.ch_center[i] = 1500;
+			InputCalibration.ch_bottom[i] = 1000;
 		}
 		
 		InputCalibration.ch_center[2] = 1000;	// Channel 3 is throttle
@@ -69,9 +65,9 @@ void InitInputs(void)
 	// Copy data to TempCalibration
 	for (int i = 0; i < 8; i++)
 	{
-		TempCalibration.ch_bottom[i] = InputCalibration.ch_bottom[i];
-		TempCalibration.ch_center[i] = InputCalibration.ch_center[i];
 		TempCalibration.ch_top[i] = InputCalibration.ch_top[i];
+		TempCalibration.ch_center[i] = InputCalibration.ch_center[i];
+		TempCalibration.ch_bottom[i] = InputCalibration.ch_bottom[i];
 	}
 	
 	// Initialize External Interrupts
@@ -86,17 +82,126 @@ void InitInputs(void)
 				xCalibrationTaskHandle);
 
 	vTaskSuspend(xCalibrationTaskHandle);
+}
+
+/**
+ * Calibration Task for FreeRTOS
+ **/
+void vTaskCalibrate(void *pvParameters)
+{
+	int runs = 0;
+
+	while (1)
+	{
+		if (CalibrationState == SaveCalibratedData)
+		{
+			SaveCalibratedDataToRAM();
+			CalibrationState = NoCommand;
+			vTaskSuspend(xCalibrationTaskHandle);
+		}
+
+		else if (CalibrationState == CalibrateCenter)
+		{
+			CalibrateCenterLevels(runs++);
+			if (runs > 10)
+			{
+				runs = 0;
+				vTaskSuspend(xCalibrationTaskHandle);
+			}
+		}
+
+		else if (CalibrationState == CalibrateInputs)
+			CalibrateInputLevels(FALSE);
+
+		else
+			vTaskSuspend(xCalibrationTaskHandle);
+
+		vTaskDelay(25 / portTICK_RATE_MS);
+	}
+}
+
+void RunCalibrationState(cal_state state)
+{
+	CalibrationState = state;
+
+	if (state == CalibrateInputs)
+		CalibrateInputLevels(TRUE);
+
+	if (state == NoCommand)
+		vTaskSuspend(xCalibrationTaskHandle);
+	else
+		xTaskResumeFromISR(xCalibrationTaskHandle);
+}
+
+/**
+ * Copy calibrated data to the InputCalibration struct
+ **/
+void SaveCalibratedDataToRAM(void)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		InputCalibration.ch_top[i] = TempCalibration.ch_top[i];
+		InputCalibration.ch_center[i] = TempCalibration.ch_center[i];
+		InputCalibration.ch_bottom[i] = TempCalibration.ch_bottom[i];
+	}
+}
+
+/**
+ * Calibrates the top and bottom level of the inputs.
+ **/
+void CalibrateInputLevels(Bool first)
+{
+	if (first == TRUE)
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			TempCalibration.ch_top[i] = TempCalibration.ch_center[i];
+			TempCalibration.ch_bottom[i] = TempCalibration.ch_center[i];
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			if (GetRawInputLevel(i) > TempCalibration.ch_top[i])
+				TempCalibration.ch_top[i] = GetRawInputLevel(i);
+
+			if (GetRawInputLevel(i) < InputCalibration.ch_bottom[i])
+				TempCalibration.ch_top[i] = GetRawInputLevel(i);
+		}
+	}
+}
+
+/**
+ * Calibrates the center level of the inputs.
+ **/
+void CalibrateCenterLevels(int32_t runs)
+{
+	static int32_t tempcal[8];
+	if (runs > 9)
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			TempCalibration.ch_center[i] = tempcal[i]/runs;
+			tempcal[i] = 0;
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 8; i++)
+			tempcal[i] += GetRawInputLevel(i);
+	}
 
 }
 
 /**
  * Return the status of the inputs.
- * 
+ *
  * Bit 0 = Channel 1
- * Bit 1 = Cahnnel 2
+ * Bit 1 = Channel 2
  * 		...
  * Bit 7 = Channel 8
- * 
+ *
  * Bit Cleared = Normal Operation
  * Bit Set = No Connection
  **/
@@ -108,65 +213,13 @@ uint8_t GetInputStatus(void)
 		if (GetRawInputLevel(i) == 0)
 			status |= (1<<i);
 	}
-	
+
 	return status;
 }
 
 uint8_t GetRoleChannel(uint8_t role)
 {
 	return ((InputCalibration.role >> role) & 0x03);
-}
-
-void SaveCalibratedDataToRAM(void)
-{
-	// Copy TempCalibration data to InputCalibration
-	for (int i = 0; i < 8; i++)
-	{
-		InputCalibration.ch_bottom[i] = TempCalibration.ch_bottom[i];
-		InputCalibration.ch_center[i] = TempCalibration.ch_center[i];
-		InputCalibration.ch_top[i] = TempCalibration.ch_top[i];
-	}
-}
-
-/**
- * Resets old calibrated values in order for new
- * values to be written.
- **/
-void ResetCalibration(void)
-{
-	for (uint8_t i = 0; i < 8; i++)
-	{
-		InputCalibration.ch_bottom[i] = 1500;
-		InputCalibration.ch_center[i] = 1500;
-		InputCalibration.ch_top[i] = 1500;
-	}
-}
-
-/**
- * Calibrates the top and bottom level of the inputs.
- * Loop it while calibrating
- **/
-void CalibrateInputLevels(void)
-{
-	for (int i = 0; i < 8; i++)
-	{
-		if (GetRawInputLevel(i) > InputCalibration.ch_top[i])
-			InputCalibration.ch_top[i] = GetRawInputLevel(i);
-			
-		if (GetRawInputLevel(i) < InputCalibration.ch_bottom[i])
-			InputCalibration.ch_top[i] = GetRawInputLevel(i);
-	}
-}
-
-/**
- * Calibrates the center level of the inputs.
- **/
-void CalibrateCenterLevels(void)
-{
-	for (int i = 0; i < 8; i++)
-	{
-		InputCalibration.ch_center[i] = GetRawInputLevel(i);	
-	}
 }
 
 /**
@@ -214,7 +267,7 @@ fix32 GetInputLevel(uint8_t channel)
 /**
  * Returns the current RC stick position without bias compensation.
  **/
-uint16_t GetRawInputLevel(uint8_t channel)
+int32_t GetRawInputLevel(uint8_t channel)
 {
 	return InputData.value[channel];
 }

@@ -24,7 +24,7 @@ void BMA180_Init(uint8_t bw, uint8_t range)
 	BMA180_Write(OLSB1, temp); 						//Write new range data, keep other bits the same
 }
 
-Status BMA180_BurstRead(uint8_t *buffer)
+Status BMA180_BurstRead(uint8_t *buffer, PFV callback)
 {
 	uint8_t address = ACCXLSB;
 	
@@ -35,7 +35,7 @@ Status BMA180_BurstRead(uint8_t *buffer)
 	TransferCfg.rx_data = buffer;
 	TransferCfg.rx_length = 6;				// Six bytes to be recieved
 	TransferCfg.retransmissions_max = 5;
-	TransferCfg.callback = NULL;
+	TransferCfg.callback = callback;
 	
 	return I2C_MasterTransferData(LPC_I2C0, &TransferCfg, I2C_TRANSFER_POLLING);
 }

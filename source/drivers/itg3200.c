@@ -9,7 +9,7 @@ void ITG3200_Init(void)
 	ITG3200_Write(PWR_M, 0x00);						// Return to normal operation
 }
 
-Status ITG3200_BurstRead(uint8_t *buffer)
+Status ITG3200_BurstRead(uint8_t *buffer, PFV callback)
 {
 	uint8_t address = GX_H;
 	
@@ -20,7 +20,7 @@ Status ITG3200_BurstRead(uint8_t *buffer)
 	TransferCfg.rx_data = buffer;
 	TransferCfg.rx_length = 6;				// Six bytes to be recieved
 	TransferCfg.retransmissions_max = 5;
-	TransferCfg.callback = NULL;
+	TransferCfg.callback = callback;
 	
 	return I2C_MasterTransferData(LPC_I2C0, &TransferCfg, I2C_TRANSFER_POLLING);
 }

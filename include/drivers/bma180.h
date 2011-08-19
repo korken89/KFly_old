@@ -75,7 +75,7 @@ struct _acc_data {
 typedef struct _acc_data acc_data;
 
 void BMA180_Init(uint8_t, uint8_t);
-Status BMA180_BurstRead(uint8_t *);
+Status BMA180_BurstRead(uint8_t *, PFV);
 Status BMA180_Read(uint8_t, uint8_t*);
 Status BMA180_Write(uint8_t, uint8_t);
 

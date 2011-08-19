@@ -7,12 +7,12 @@
 void ReadAcc(float *data)
 {
 	uint8_t temp[6];
-	BMA180_BurstRead(temp);
+	BMA180_BurstRead(temp, NULL);
 	
-	int16_t rate[3];
-	rate[0] = (int16_t)((temp[1]<<8)|temp[0]);
-	rate[1] = (int16_t)((temp[3]<<8)|temp[2]);
-	rate[2] = (int16_t)((temp[5]<<8)|temp[4]);
+	int32_t rate[3];
+	rate[0] = (int32_t)((temp[1]<<8)|temp[0]);
+	rate[1] = (int32_t)((temp[3]<<8)|temp[2]);
+	rate[2] = (int32_t)((temp[5]<<8)|temp[4]);
 	
 	rate[0] >>= 2;
 	rate[1] >>= 2;
@@ -47,12 +47,12 @@ void ReadAcc(float *data)
 void ReadGyroRate(float *data)
 {
 	uint8_t temp[6];
-	ITG3200_BurstRead(temp);
+	ITG3200_BurstRead(temp, NULL);
 	
-	int16_t rate[3];
-	rate[0] = (int16_t)((temp[0]<<8)|temp[1]);
-	rate[1] = (int16_t)((temp[2]<<8)|temp[3]);
-	rate[2] = (int16_t)((temp[4]<<8)|temp[5]);
+	int32_t rate[3];
+	rate[0] = (int32_t)((temp[0]<<8)|temp[1]);
+	rate[1] = (int32_t)((temp[2]<<8)|temp[3]);
+	rate[2] = (int32_t)((temp[4]<<8)|temp[5]);
 	
 	// X-axis
 	#if configFLIP_GYRO_X == 0

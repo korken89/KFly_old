@@ -11,19 +11,26 @@
 typedef struct
 {
 	uint8_t role;
-	int16_t ch_center[8];
-	int16_t ch_top[8];
-	int16_t ch_bottom[8];
+	int32_t ch_center[8];
+	int32_t ch_top[8];
+	int32_t ch_bottom[8];
 } input_calibration;
 
+typedef enum {
+	NoCommand = 0,
+	SaveCalibratedData,
+	CalibrateInputs,
+	CalibrateCenter
+} cal_state;
+
 void vTaskCalibrate(void *);
+void RunCalibrationState(cal_state);
 void InitInputs(void);
 uint8_t GetInputStatus(void);
-void ResetCalibration(void);
-void CalibrateInputLevels(void);
-void CalibrateCenterLevels(void);
+void CalibrateInputLevels(Bool);
+void CalibrateCenterLevels(int32_t);
 void SaveCalibratedDataToRAM(void);
 fix32 GetInputLevel(uint8_t);
-uint16_t GetRawInputLevel(uint8_t);
+int32_t GetRawInputLevel(uint8_t);
 
 #endif

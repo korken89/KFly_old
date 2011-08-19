@@ -9,7 +9,7 @@
 #include "pwm.h"
 #include "fmath.h"
 #include "eemul.h"
-
+#include "sensors.h"
 
 typedef struct {
 	fix32 a_iState;
@@ -23,14 +23,17 @@ typedef struct {
 } pid_data;
 
 typedef struct {
-	fix8 mix[8][4];
+	fix32 mix[8][4];
 } mix_data;
 
-void InitPID(pid_data *, uint8_t);
+void vTaskControlLoop(void *);
+void vTaskArmDisarm(void *);
+void InitPID(uint8_t);
 void InitMixer(void);
-fix32 PIDUpdateChannel(pid_data *, kalman_data *, uint8_t);
-fix32 PIDUpdateYaw(pid_data *, float);
-void UpdOutputs(kalman_data *, kalman_data *, float, pid_data *, pid_data *, pid_data *);
+fix32 PIDUpdatePitch(kalman_data *);
+fix32 PIDUpdateRoll(kalman_data *);
+fix32 PIDUpdateYaw(float);
+void UpdOutputs(kalman_data *, kalman_data *, float);
 void PIDArm(void);
 void PIDDisarm(void);
 Bool PIDArmed(void);
