@@ -3,8 +3,7 @@ MEMORY
     FLASH (rx) : ORIGIN = 0x0, LENGTH = 480k
     EEMUL (rx) : ORIGIN = 0x78000, LENGTH = 32k
     SRAM (rwx) : ORIGIN = 0x10000000, LENGTH = 32k
-	AHBRAM0	: ORIGIN = 0x2007c000, LENGTH = 16k
-	AHBRAM1	: ORIGIN = 0x20080000, LENGTH = 16k
+	ABHSRAM (rwx) : ORIGIN = 0x2007c000, LENGTH = 32k
 }
 
 ENTRY(Reset_Handler)
@@ -42,7 +41,7 @@ SECTIONS
   
   .freertosstack : {
 	*(.freertosstack)
-  } >AHBRAM0
+  } >ABHSRAM
   
   /* DWARF debug sections.
    * Symbols in the DWARF debugging sections are relative to

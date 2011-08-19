@@ -1,6 +1,6 @@
 #include "extint.h"
 
-volatile static input_data sData;
+volatile input_data InputData;
 volatile static uint8_t check = 0;
 volatile static Bool PWMorCPPM = FALSE;
 
@@ -18,18 +18,12 @@ void EINT_Init(void)
 	LPC_GPIOINT->IO0IntEnF = INTMASK;		//
 	
 	for (int i = 0; i < 8; i++)
-		sData.value[i] = 0;			// All inputs to zero
+		InputData.value[i] = 0;			// All inputs to zero
 	
-	//sDataLocation = &sData;
 	Timer0_Init();
 	Timer1_Init();
 	
 	NVIC_EnableIRQ(EINT3_IRQn);				//Enable Interrupts for GPIO
-}
-
-input_data *EINT_GetPointerToValues(void)
-{
-	return (input_data *)&sData;
 }
 
 void EINT_NoConnectionCheck(void)
@@ -38,7 +32,7 @@ void EINT_NoConnectionCheck(void)
 		check++;
 	else if (check > 0)
 		for (uint8_t i = 0; i < 8; i++)
-				sData.value[i] = 0;	
+				InputData.value[i] = 0;	
 }
 
 void EINT3_IRQHandler (void)	
@@ -76,11 +70,11 @@ void EINT3_IRQHandler (void)
 			
 			else if (statF & (1<<(INT_CH1 +i)))			/* Code for Falling edge of Channel 1-6 */
 			{
-				sData.value[i] = Ticks - temp[i];			// Calculate
+				InputData.value[i] = Ticks - temp[i];			// Calculate
 				nocon[i] = Ticks;
 			}
 			else if ((Ticks - nocon[i]) > 200000)
-				sData.value[i] = 0;
+				InputData.value[i] = 0;
 		}
 	}
 }

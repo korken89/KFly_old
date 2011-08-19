@@ -1,7 +1,20 @@
 #include "input.h"
 
-volatile static input_data *InputData;
-volatile static input_calibration InputCalibration, TempCalibration;
+extern input_data InputData;
+volatile input_calibration InputCalibration, TempCalibration;
+volatile xTaskHandle xCalibrationTaskHandle;
+volatile static Bool CalibrateCenters = TRUE;
+
+/**
+ * FreeRTOS Tasks go at the Top of the file
+ **/
+void vTaskCalibrate(void *pvParameters)
+{
+	
+	while (1)
+	{
+	}
+}
 
 void InitInputs(void)
 {
@@ -40,7 +53,7 @@ void InitInputs(void)
 		 * Roll (5-4): 		Ch 4
 		 * Yaw (7-6): 		Ch 1
 		 */
-		 
+							//bit 76543210
 		InputCalibration.role = 0b00110110;
 		
 		for (int i = 0; i < 8; i++)
@@ -61,8 +74,19 @@ void InitInputs(void)
 		TempCalibration.ch_top[i] = InputCalibration.ch_top[i];
 	}
 	
+	// Initialize External Interrupts
 	EINT_Init();
-	InputData = EINT_GetPointerToValues();
+
+	// Create Calibration Task and put it in Suspended mode
+	xTaskCreate(vTaskCalibrate,
+				"Calibration",
+				80,
+				NULL,
+				2,
+				xCalibrationTaskHandle);
+
+	vTaskSuspend(xCalibrationTaskHandle);
+
 }
 
 /**
@@ -91,6 +115,17 @@ uint8_t GetInputStatus(void)
 uint8_t GetRoleChannel(uint8_t role)
 {
 	return ((InputCalibration.role >> role) & 0x03);
+}
+
+void SaveCalibratedDataToRAM(void)
+{
+	// Copy TempCalibration data to InputCalibration
+	for (int i = 0; i < 8; i++)
+	{
+		InputCalibration.ch_bottom[i] = TempCalibration.ch_bottom[i];
+		InputCalibration.ch_center[i] = TempCalibration.ch_center[i];
+		InputCalibration.ch_top[i] = TempCalibration.ch_top[i];
+	}
 }
 
 /**
@@ -125,36 +160,20 @@ void CalibrateInputLevels(void)
 
 /**
  * Calibrates the center level of the inputs.
- * 
- * If the vaules are withing 12.5% of top or bottom then the
- * center value will equal top or bottom when calibrated in order 
- * to get -100 to 100%, 0 to 100% and -100 to 0%.
  **/
 void CalibrateCenterLevels(void)
 {
 	for (int i = 0; i < 8; i++)
 	{
-		if (GetRawInputLevel(i) > (InputCalibration.ch_top[i] - InputCalibration.ch_top[i]>>3))
-			InputCalibration.ch_center[i] = InputCalibration.ch_top[i];
-		
-		else if (GetRawInputLevel(i) < (InputCalibration.ch_bottom[i] + InputCalibration.ch_bottom[i]>>3))
-			InputCalibration.ch_center[i] = InputCalibration.ch_bottom[i];
-		
-		else
-			InputCalibration.ch_center[i] = GetRawInputLevel(i);	
+		InputCalibration.ch_center[i] = GetRawInputLevel(i);	
 	}
-}
-
-void SaveCalibratedDataToFlashBuffer(void)
-{
-	/* Save all calibrated data to the flash buffer function goes here... */
 }
 
 /**
  * Returns the current RC stick position with bias compensation in 24.8-bit signed fixed point.
  **/
 fix32 GetInputLevel(uint8_t channel)
-{
+{	
 	channel = GetRoleChannel(channel);
 	
 	if (GetRawInputLevel(channel) == 0)
@@ -197,6 +216,5 @@ fix32 GetInputLevel(uint8_t channel)
  **/
 uint16_t GetRawInputLevel(uint8_t channel)
 {
-	channel = GetRoleChannel(channel);
-	return InputData->value[channel];
+	return InputData.value[channel];
 }

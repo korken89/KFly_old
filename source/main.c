@@ -59,9 +59,46 @@ void prvSetupHardware( void )
 
 void vTask1(void *pvParameters)
 {
+	char *str;
+	int temp;
 	while (1)
 	{
-		
+		temp = GetInputLevel(THROTTLE_CHANNEL);
+		if (temp < 0)
+		{
+			temp = -temp;
+			UART0_SendData("-", 1);
+		}
+		str = itoa(temp, 10);
+		UART0_SendData(str, ksizeof(str));
+		UART0_SendData("\t", 1);
+		temp = GetInputLevel(PITCH_CHANNEL);
+		if (temp < 0)
+		{
+			temp = -temp;
+			UART0_SendData("-", 1);
+		}
+		str = itoa(temp, 10);
+		UART0_SendData(str, ksizeof(str));
+		UART0_SendData("\t", 1);
+		temp = GetInputLevel(ROLL_CHANNEL);
+		if (temp < 0)
+		{
+			temp = -temp;
+			UART0_SendData("-", 1);
+		}
+		str = itoa(temp, 10);
+		UART0_SendData(str, ksizeof(str));
+		UART0_SendData("\t", 1);
+		temp = GetInputLevel(YAW_CHANNEL);
+		if (temp < 0)
+		{
+			temp = -temp;
+			UART0_SendData("-", 1);
+		}
+		str = itoa(temp, 10);
+		UART0_SendData(str, ksizeof(str));
+		UART0_SendData("\n", 1);
 		vTaskDelay(100 / portTICK_RATE_MS);
 	}
 }

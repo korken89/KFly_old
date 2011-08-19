@@ -21,8 +21,8 @@ typedef struct
 	int16_t value[8];		// Channel values
 } input_data;
 
+
 void EINT_Init(void); 
-input_data *EINT_GetPointerToValues(void);
 void EINT_NoConnectionCheck(void);
 void EINT3_IRQHandler(void);
 
