@@ -28,6 +28,7 @@ typedef struct {
 
 void vTaskControlLoop(void *);
 void vTaskArmDisarm(void *);
+void InitControlLoops(void);
 void InitPID(uint8_t);
 void InitMixer(void);
 fix32 PIDUpdatePitch(kalman_data *);

@@ -22,6 +22,7 @@ void vTaskControlLoop(void *pvParameters)
 
 	InitKalman(&data_xz);
 	InitKalman(&data_yz);
+	InitMixer();
 	InitPID(PITCH_CHANNEL);
 	InitPID(ROLL_CHANNEL);
 	InitPID(YAW_CHANNEL);
@@ -96,6 +97,27 @@ void vTaskArmDisarm(void *pvParameters)
 
 		vTaskDelayUntil(&xLastWakeTime, 100 / portTICK_RATE_MS);
 	}
+}
+
+void InitControlLoops(void)
+{
+	PWM_Init();
+	I2C0_Init();
+
+	/** Create FreeRTOS Tasks **/
+	xTaskCreate(vTaskControlLoop,
+				"Control",
+				200,
+				NULL,
+				2,
+				NULL);
+
+	xTaskCreate(vTaskArmDisarm,
+				"Arm/Disarm",
+				80,
+				NULL,
+				1,
+				NULL);
 }
 
 void InitPID(uint8_t channel)
@@ -186,38 +208,22 @@ void InitPID(uint8_t channel)
 			data_yaw.a_imax = (fix32)(30.0f*FP_MUL);
 		}
 	}	
-
-
-	/** Create FreeRTOS Tasks **/
-	xTaskCreate(vTaskControlLoop,
-				"Control",
-				200,
-				NULL,
-				2,
-				NULL);
-
-	xTaskCreate(vTaskArmDisarm,
-				"Arm/Disarm",
-				80,
-				NULL,
-				1,
-				NULL);
 }
 
 void InitMixer(void)
 {
-	if (EEMUL_DATA->ID == KFLY_ID)
+	/*if (EEMUL_DATA->ID == KFLY_ID)
 	{
 		for (int i = 0; i < 8; i++)
 			for (int j = 0; j < 4; j++)
 				mixer.mix[i][j] = (fix8)EEMUL_DATA->MIX[i][j];
 	}
 	else
-	{	
+	{	*/
 		for (int i = 0; i < 8; i++)
 			for (int j = 0; j < 4; j++)
 				mixer.mix[i][j] = 0;
-	}
+	//}
 }
 
 fix32 PIDUpdatePitch(kalman_data *data)

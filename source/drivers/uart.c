@@ -14,9 +14,10 @@ void UART0_SendFIFO(void);
 
 PFV ReceivedHandlerFunction = NULL;
 
-volatile unsigned char fifo[FIFOBUFSIZE];
-volatile unsigned rd=0, wr=0;       /* read and write positions */
+volatile uint8_t fifo[FIFOBUFSIZE];
+volatile uint8_t rd = 0, wr = 0;       /* read and write positions */
 volatile Bool fifoSending = FALSE;
+volatile uint32_t status = 0;
 
 void UART_Init(void)
 {
@@ -122,12 +123,12 @@ void UART0_SendFIFO(void)
 
 void UART0_IRQHandler(void)
 {
-	uint32_t status = ((LPC_UART0->IIR >> 1) & 0x07);
+	status = ((LPC_UART0->IIR >> 1) & 0x07);
 	
 	if (status == 1)		// Character sent interrupt
 		UART0_SendFIFO();
 	
-	else if (status == 2)	// Character recieved interrupt
+	else if ((status == 2) || (status == 6))	// Character recieved interrupt
 	{
 		if (ReceivedHandlerFunction != NULL)
 			ReceivedHandlerFunction();

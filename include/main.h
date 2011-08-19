@@ -20,11 +20,9 @@
 /* Application includes */
 #include "leds.h"
 #include "uart.h"
-#include "pwm.h"
 #include "input.h"
 #include "timer.h"
 //#include "gps.h"
-#include "sensors.h"
 #include "misc.h"
 
 void prvSetupHardware(void);

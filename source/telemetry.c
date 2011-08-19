@@ -56,11 +56,11 @@ void rxWait(void)
 			break;
 		
 		case 0x05: // GetChannelMix
-			parser = rxNothing;
+			parser = rxGetChannelMix;
 			break;
 		
 		case 0x06: // SetChannelMix
-			parser = rxNothing;
+			parser = rxSetChannelMix;
 			break;
 		
 		case 0x07: // SartRCCalibration
