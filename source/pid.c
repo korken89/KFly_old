@@ -212,18 +212,18 @@ void InitPID(uint8_t channel)
 
 void InitMixer(void)
 {
-	/*if (EEMUL_DATA->ID == KFLY_ID)
+	if (EEMUL_DATA->ID == KFLY_ID)
 	{
 		for (int i = 0; i < 8; i++)
 			for (int j = 0; j < 4; j++)
 				mixer.mix[i][j] = (fix8)EEMUL_DATA->MIX[i][j];
 	}
 	else
-	{	*/
+	{
 		for (int i = 0; i < 8; i++)
 			for (int j = 0; j < 4; j++)
 				mixer.mix[i][j] = 0;
-	//}
+	}
 }
 
 fix32 PIDUpdatePitch(kalman_data *data)
