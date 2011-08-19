@@ -1,6 +1,6 @@
 #include "input.h"
 
-/** External Variables **/
+/** External Globals **/
 extern input_data InputData;
 
 /** Public Globals **/

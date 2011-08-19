@@ -1,13 +1,23 @@
 #include "telemetry.h"
 
+/** External Globals **/
+extern input_calibration TempCalibration;
+extern mix_data mixer;
+extern pid_data data_pitch;
+extern pid_data data_roll;
+extern pid_data data_yaw;
+
+/** Public Globals **/
+// ---
+
+/** Private Globals **/
 volatile static uint8_t data_cnt;
 volatile static uint8_t data_array[64];
 volatile static uint8_t counter;
-
 volatile static uint32_t data_rxerror = 0;
 volatile static uint32_t data_rxsuccess = 0;
 volatile static uint8_t CRC = 0;
-volatile PFV parser = NULL;
+volatile static PFV parser = NULL;
 
 void startTelemetry(void)
 {
@@ -38,11 +48,11 @@ void rxWait(void)
 			break;
 		
 		case 0x03: // GetRegulatorData
-			parser = rxNothing;
+			parser = rxGetRegulatorData;
 			break;
 		
 		case 0x04: // SetRegulatorData
-			parser = rxNothing;
+			parser = rxSetRegulatorData;
 			break;
 		
 		case 0x05: // GetChannelMix
@@ -91,17 +101,149 @@ void rxNothing(void)
 void rxPing(void)
 {
 	UART0_SetReceivedIRQHandler(rxWait);
-	const uint8_t data[] = {1, 0};
-	const uint8_t msg[] = {1, 0, crc8((uint8_t *)data, 2)};
+	uint8_t data[] = {1, 0};
+	uint8_t msg[] = {1, 0, crc8(data, 2)};
 	UART0_SendData((uint8_t *)msg, 3);
 }
 
 void rxSaveToFlash(void)
 {
 	UART0_SetReceivedIRQHandler(rxWait);
-	
+
 	/* Add save to flash code */
-	
+
+}
+
+void rxGetRegulatorData(void)
+{
+	UART0_SetReceivedIRQHandler(rxWait);
+
+	uint8_t i = 0;
+	uint8_t data[39];
+	data[i++] = 0x03;
+	data[i++] = 36;
+	data[i++] = (uint8_t)data_pitch.r_kp;
+	data[i++] = (uint8_t)(data_pitch.r_kp>>8);
+	data[i++] = (uint8_t)data_pitch.r_ki;
+	data[i++] = (uint8_t)(data_pitch.r_ki>>8);
+	data[i++] = (uint8_t)data_pitch.r_imax;
+	data[i++] = (uint8_t)(data_pitch.r_imax>>8);
+
+	data[i++] = (uint8_t)data_roll.r_kp;
+	data[i++] = (uint8_t)(data_roll.r_kp>>8);
+	data[i++] = (uint8_t)data_roll.r_ki;
+	data[i++] = (uint8_t)(data_roll.r_ki>>8);
+	data[i++] = (uint8_t)data_roll.r_imax;
+	data[i++] = (uint8_t)(data_roll.r_imax>>8);
+
+	data[i++] = (uint8_t)data_yaw.r_kp;
+	data[i++] = (uint8_t)(data_yaw.r_kp>>8);
+	data[i++] = (uint8_t)data_yaw.r_ki;
+	data[i++] = (uint8_t)(data_yaw.r_ki>>8);
+	data[i++] = (uint8_t)data_yaw.r_imax;
+	data[i++] = (uint8_t)(data_yaw.r_imax>>8);
+
+	data[i++] = (uint8_t)data_pitch.a_kp;
+	data[i++] = (uint8_t)(data_pitch.a_kp>>8);
+	data[i++] = (uint8_t)data_pitch.a_ki;
+	data[i++] = (uint8_t)(data_pitch.a_ki>>8);
+	data[i++] = (uint8_t)data_pitch.a_imax;
+	data[i++] = (uint8_t)(data_pitch.a_imax>>8);
+
+	data[i++] = (uint8_t)data_roll.a_kp;
+	data[i++] = (uint8_t)(data_roll.a_kp>>8);
+	data[i++] = (uint8_t)data_roll.a_ki;
+	data[i++] = (uint8_t)(data_roll.a_ki>>8);
+	data[i++] = (uint8_t)data_roll.a_imax;
+	data[i++] = (uint8_t)(data_roll.a_imax>>8);
+
+	data[i++] = (uint8_t)data_yaw.a_kp;
+	data[i++] = (uint8_t)(data_yaw.a_kp>>8);
+	data[i++] = (uint8_t)data_yaw.a_ki;
+	data[i++] = (uint8_t)(data_yaw.a_ki>>8);
+	data[i++] = (uint8_t)data_yaw.a_imax;
+	data[i++] = (uint8_t)(data_yaw.a_imax>>8);
+
+	data[i++] = crc8(data, 38);
+
+	UART0_SendData(data, 39);
+}
+
+void rxSetRegulatorData(void)
+{
+	UART0_SetReceivedIRQHandler(rxWait);
+	uint8_t i = 2;
+
+	data_pitch.r_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_pitch.r_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_pitch.r_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+
+	data_roll.r_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_roll.r_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_roll.r_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+
+	data_yaw.r_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_yaw.r_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_yaw.r_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+
+	data_pitch.a_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_pitch.a_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_pitch.a_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+
+	data_roll.a_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_roll.a_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_roll.a_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+
+	data_yaw.a_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_yaw.a_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	data_yaw.a_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+}
+
+void rxGetChannelMix(void)
+{
+	UART0_SetReceivedIRQHandler(rxWait);
+
+	uint8_t i = 0;
+	uint8_t data[35];
+
+	data[i++] = 0x05;
+	data[i++] = 32;
+
+	for (int j = 0; j < 8; j++)
+		for (int k = 0; k < 4; k++)
+			data[i++] = (uint8_t)mixer.mix[j][k];
+
+	data[i++] = crc8(data, 34);
+
+	UART0_SendData(data, 35);
+}
+
+void rxSetChannelMix(void)
+{
+	UART0_SetReceivedIRQHandler(rxWait);
+
+	uint8_t i = 2;
+
+	for (int j = 0; j < 8; j++)
+		for (int k = 0; k < 4; k++)
+			mixer.mix[j][k] = (fix32)((int8_t)data_array[i++]);
 }
 
 void GetDataCount(void)
