@@ -19,6 +19,12 @@ volatile static uint32_t data_rxsuccess = 0;
 volatile static uint8_t CRC = 0;
 volatile static PFV parser = NULL;
 
+void InitTelemetry(void)
+{
+	UART_Init();
+	startTelemetry();
+}
+
 void startTelemetry(void)
 {
     UART0_SetReceivedIRQHandler(rxWait);

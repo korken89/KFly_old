@@ -30,12 +30,9 @@ void prvSetupHardware( void )
 {
 	__disable_irq();
 	LED_Init();
-	UART_Init();
-	startTelemetry();
-	//GPS_UART_Init();
+	InitTelemetry();
 	InitInputs();
 	InitControlLoops();
-	//Timer2_Init();
 	SystemInit();
 	__enable_irq();
 	BMA180_Init(BW_300HZ, RANGE_2G);

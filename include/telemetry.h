@@ -10,6 +10,7 @@
 #define ACK		0x7F
 #define NACK	0x7E
 
+void InitTelemetry(void);
 void startTelemetry(void);
 void stopTelemetry(void);
 void rxWait(void);

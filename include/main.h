@@ -1,7 +1,6 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-
 /* Standard includes */
 #include <stdint.h>
 #include <stdio.h>
@@ -19,10 +18,8 @@
 
 /* Application includes */
 #include "leds.h"
-#include "uart.h"
+#include "telemetry.h"
 #include "input.h"
-#include "timer.h"
-//#include "gps.h"
 #include "misc.h"
 
 void prvSetupHardware(void);
