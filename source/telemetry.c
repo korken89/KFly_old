@@ -21,7 +21,7 @@ volatile static PFV parser = NULL;
 
 void InitTelemetry(void)
 {
-	UART_Init();
+	InitUART0();
 	startTelemetry();
 }
 
@@ -70,27 +70,27 @@ void rxWait(void)
 			break;
 		
 		case 0x07: // SartRCCalibration
-			parser = rxNothing;
+			parser = rxSartRCCalibration;
 			break;
 		
 		case 0x08: // StopRCCalibration
-			parser = rxNothing;
+			parser = rxStopRCCalibration;
 			break;
 		
 		case 0x09: // CalibrateRCCenters
-			parser = rxNothing;
+			parser = rxCalibrateRCCenters;
 			break;
 		
 		case 0x0A: // GetRCCalibration
-			parser = rxNothing;
+			parser = rxGetRCCalibration;
 			break;
 		
 		case 0x0B: // SetRCCalibration
-			parser = rxNothing;
+			parser = rxSetRCCalibration;
 			break;
 		
 		case 0x0C: // GetRCValues
-			parser = rxNothing;
+			parser = rxGetRCValues;
 			break;
 		
 		default:
@@ -114,17 +114,12 @@ void rxPing(void)
 
 void rxSaveToFlash(void)
 {
-	UART0_SetReceivedIRQHandler(rxWait);
-
 	/* Add save to flash code */
-
 }
 
 void rxGetRegulatorData(void)
 {
-	UART0_SetReceivedIRQHandler(rxWait);
-
-	uint8_t i = 0;
+	int i = 0;
 	uint8_t data[39];
 	data[i++] = 0x03;
 	data[i++] = 36;
@@ -177,8 +172,7 @@ void rxGetRegulatorData(void)
 
 void rxSetRegulatorData(void)
 {
-	UART0_SetReceivedIRQHandler(rxWait);
-	uint8_t i = 2;
+	int i = 2;
 
 	data_pitch.r_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
 	i += 2;
@@ -224,9 +218,7 @@ void rxSetRegulatorData(void)
 
 void rxGetChannelMix(void)
 {
-	UART0_SetReceivedIRQHandler(rxWait);
-
-	uint8_t i = 0;
+	int i = 0;
 	uint8_t data[35];
 
 	data[i++] = 0x05;
@@ -243,18 +235,73 @@ void rxGetChannelMix(void)
 
 void rxSetChannelMix(void)
 {
-	UART0_SetReceivedIRQHandler(rxWait);
-
-	uint8_t i = 2;
+	int i = 2;
 
 	for (int j = 0; j < 8; j++)
 		for (int k = 0; k < 4; k++)
 			mixer.mix[j][k] = (fix32)((int8_t)data_array[i++]);
 }
 
+void rxSartRCCalibration(void)
+{
+
+}
+
+void rxStopRCCalibration(void)
+{
+
+}
+
+void rxCalibrateRCCenters(void)
+{
+
+}
+
+void rxGetRCCalibration(void)
+{
+	int i = 0;
+	uint8_t data[54];
+
+	data[i++] = 0x0A;
+	data[i++] = 51;
+
+	data[i++] = (uint8_t)TempCalibration.role;
+	data[i++] = (uint8_t)(TempCalibration.role >> 8);
+	data[i++] = (uint8_t)(TempCalibration.role >> 16);
+
+	for (int j = 0; j < 8; j++)
+	{
+		data[i++] = (uint8_t)TempCalibration.ch_top[j];
+		data[i++] = (uint8_t)(TempCalibration.ch_top[j] >> 8);
+		data[i++] = (uint8_t)TempCalibration.ch_center[j];
+		data[i++] = (uint8_t)(TempCalibration.ch_center[j] >> 8);
+		data[i++] = (uint8_t)TempCalibration.ch_bottom[j];
+		data[i++] = (uint8_t)(TempCalibration.ch_bottom[j] >> 8);
+	}
+
+	data[i++] = crc8(data, 53);
+	UART0_SendData(data, 54);
+}
+
+void rxSetRCCalibration(void)
+{
+
+}
+
+void rxGetRCValues(void)
+{
+
+}
+
 void GetDataCount(void)
 {
 	data_cnt = UART0_GetChar();
+	if (data_cnt > 61)
+	{
+		UART0_SetReceivedIRQHandler(rxWait);
+
+		return;
+	}
 	data_array[1] = data_cnt;
 	counter = 2;
 	UART0_SetReceivedIRQHandler(GetData);
@@ -269,7 +316,8 @@ void GetData(void)
 }
 
 void CheckCRC(void)
-{	
+{
+	UART0_SetReceivedIRQHandler(rxWait);
 	CRC = crc8((uint8_t *)data_array, (uint8_t)(data_cnt+2));
 	
 	if (CRC == data_array[data_cnt+2])
@@ -280,7 +328,6 @@ void CheckCRC(void)
 	else
 	{
 		data_rxerror++;
-		UART0_SetReceivedIRQHandler(rxWait);
 	}
 }
 

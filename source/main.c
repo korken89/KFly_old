@@ -1,5 +1,4 @@
 #include "main.h"
-#include "telemetry.h"
 
 void main( void )
 {
@@ -29,7 +28,6 @@ void main( void )
 void prvSetupHardware( void )
 {
 	__disable_irq();
-	LED_Init();
 	InitTelemetry();
 	InitInputs();
 	InitControlLoops();

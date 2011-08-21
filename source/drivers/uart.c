@@ -19,7 +19,7 @@ volatile uint8_t rd = 0, wr = 0;       /* read and write positions */
 volatile Bool fifoSending = FALSE;
 volatile uint32_t status = 0;
 
-void UART_Init(void)
+void InitUART0(void)
 {
 	/** UART0 */
 	LPC_SC->PCONP |= (1<<PCUART0);					// Power up the UART

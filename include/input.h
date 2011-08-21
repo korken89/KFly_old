@@ -10,7 +10,7 @@
 
 typedef struct
 {
-	uint8_t role;
+	uint32_t role;
 	int32_t ch_center[8];
 	int32_t ch_top[8];
 	int32_t ch_bottom[8];

@@ -8,7 +8,7 @@
 
 #define FIFOBUFSIZE		128
 
-void UART_Init(void);
+void InitUART0(void);
 uint8_t UART0_GetChar(void);
 void UART0_SetReceivedIRQHandler(PFV);
 void UART0_SendData(uint8_t *, uint8_t);

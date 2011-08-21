@@ -1,14 +1,14 @@
 #include "pid.h"
 
-/** Private Globals **/
-volatile static Bool bEnginesArmed = FALSE;
-volatile static Bool bPIDArmed = FALSE;
-
 /** Public Globals **/
 volatile mix_data mixer;
 volatile pid_data data_pitch;
 volatile pid_data data_roll;
 volatile pid_data data_yaw;
+
+/** Private Globals **/
+volatile static Bool bEnginesArmed = FALSE;
+volatile static Bool bPIDArmed = FALSE;
 
 void vTaskControlLoop(void *pvParameters)
 {
@@ -101,6 +101,7 @@ void vTaskArmDisarm(void *pvParameters)
 
 void InitControlLoops(void)
 {
+	LED_Init();
 	PWM_Init();
 	I2C0_Init();
 

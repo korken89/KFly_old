@@ -10,26 +10,30 @@ volatile input_calibration TempCalibration;
 volatile static input_calibration InputCalibration;
 volatile static Bool CalibrateCenters = TRUE;
 volatile static cal_state CalibrationState = NoCommand;
-volatile static xTaskHandle xCalibrationTaskHandle;
+volatile xTaskHandle xCalibrationTaskHandle;
 
 void InitInputs(void)
 {
 	if (EEMUL_DATA->ID == KFLY_ID)
 	{
-		uint8_t role = (uint8_t)EEMUL_DATA->INPUT_ROLE;
+		uint32_t role = EEMUL_DATA->INPUT_ROLE;
 		InputCalibration.role = 0;
 		
 		// Load role data
-		/* Role (bits):
-		 * Throttle (1-0)
-		 * Pitch (3-2)
-		 * Roll (5-4)
-		 * Yaw (7-6)
+		/* Role 	(3 bits):
+		 * Throttle	(0-2)
+		 * Pitch 	(3-5)
+		 * Roll		(6-8)
+		 * Yaw		(9-11)
+		 * Mode		(12-14)
+		 * Aux 1	(15-17)
+		 * Aux 2	(18-20)
+		 * Aux 3	(21-23)
 		 */
-		for (uint8_t i = 0; i < 4; i++)
+		for (uint8_t i = 0; i < 8; i++)
 		{
-			InputCalibration.role |= ((i << (2*(role & 0x03))) & 0x03);
-			role >>= 2;
+			InputCalibration.role |= ((i << (3*(role & 0x07))) & 0x07);
+			role >>= 3;
 		}
 		
 		// Load calibration data
@@ -43,14 +47,18 @@ void InitInputs(void)
 	else
 	{	// No data was found... Use standard values
 		
-		/* Role (bits):
-		 * Throttle (1-0): 	Ch 3
-		 * Pitch (3-2): 	Ch 2
-		 * Roll (5-4): 		Ch 4
-		 * Yaw (7-6): 		Ch 1
+		/* Role 	(3 bits)	Channel
+		 * Throttle	(0-2):		Ch 3 (2)
+		 * Pitch 	(3-5):		Ch 2 (1)
+		 * Roll		(6-8):		Ch 4 (3)
+		 * Yaw		(9-11):		Ch 1 (0)
+		 * Mode		(12-14):	Ch 5 (4)
+		 * Aux 1	(15-17):	Ch 6 (5)
+		 * Aux 2	(18-20):	Ch 7 (6)
+		 * Aux 3	(21-23):	Ch 8 (7)
 		 */
-							//bit 76543210
-		InputCalibration.role = 0b00110110;
+							//bit ..................... 9876543210
+		InputCalibration.role = 0b00000000111110101100000011001010;
 		
 		for (int i = 0; i < 8; i++)
 		{
@@ -85,7 +93,7 @@ void InitInputs(void)
 }
 
 /**
- * Calibration Task for FreeRTOS
+ * RC Input Calibration Task for FreeRTOS
  **/
 void vTaskCalibrate(void *pvParameters)
 {
@@ -163,11 +171,12 @@ void CalibrateInputLevels(Bool first)
 	{
 		for (int i = 0; i < 8; i++)
 		{
-			if (GetRawInputLevel(i) > TempCalibration.ch_top[i])
-				TempCalibration.ch_top[i] = GetRawInputLevel(i);
+			int32_t data = GetRawInputLevel(i);
+			if (data > TempCalibration.ch_top[i])
+				TempCalibration.ch_top[i] = data;
 
-			if (GetRawInputLevel(i) < InputCalibration.ch_bottom[i])
-				TempCalibration.ch_top[i] = GetRawInputLevel(i);
+			if (data < InputCalibration.ch_bottom[i])
+				TempCalibration.ch_top[i] = data;
 		}
 	}
 }
@@ -219,7 +228,7 @@ uint8_t GetInputStatus(void)
 
 uint8_t GetRoleChannel(uint8_t role)
 {
-	return ((InputCalibration.role >> role) & 0x03);
+	return (uint8_t)((InputCalibration.role >> role) & 0x07);
 }
 
 /**
@@ -228,11 +237,12 @@ uint8_t GetRoleChannel(uint8_t role)
 fix32 GetInputLevel(uint8_t channel)
 {	
 	channel = GetRoleChannel(channel);
-	
-	if (GetRawInputLevel(channel) == 0)
+	int32_t data = GetRawInputLevel(channel);
+
+	if (data == 0)
 		return 0;
 	
-	fix32 level = (fix32)(((int32_t)GetRawInputLevel(channel) - (int32_t)InputCalibration.ch_center[channel])*FP_MUL);
+	fix32 level = (fix32)((data - InputCalibration.ch_center[channel])*FP_MUL);
 	fix32 temp;
 	
 	if (level > 0)

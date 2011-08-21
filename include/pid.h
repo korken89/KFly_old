@@ -1,15 +1,32 @@
 #ifndef PID_H
 #define PID_H
 
-#include "configKFly.h"
-#include "kalman.h"
-#include "input.h"
+
+/* Standard includes */
+#include <stdint.h>
+#include <stdio.h>
+
+/* System includes */
+#include "LPC17xx.h"
+#include "system_LPC17xx.h"
 #include "lpc_types.h"
-#include "uart.h"
-#include "pwm.h"
+
+/* Scheduler includes. */
+#include "FreeRTOS.h"
+#include "task.h"
+
+/* KFly includes */
+#include "configKFly.h"
 #include "fmath.h"
 #include "eemul.h"
+
+/* Includes */
+#include "kalman.h"
+#include "input.h"
+#include "uart.h"
+#include "pwm.h"
 #include "sensors.h"
+#include "leds.h"
 
 typedef struct {
 	fix32 a_iState;

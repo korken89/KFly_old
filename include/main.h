@@ -17,7 +17,6 @@
 #include "configKFly.h"
 
 /* Init includes */
-#include "leds.h"
 #include "telemetry.h"
 #include "input.h"
 #include "misc.h"
