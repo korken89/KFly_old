@@ -10,7 +10,7 @@ volatile input_calibration TempCalibration;
 volatile static input_calibration InputCalibration;
 volatile static Bool CalibrateCenters = TRUE;
 volatile static cal_state CalibrationState = NoCommand;
-volatile xTaskHandle xCalibrationTaskHandle;
+volatile static xTaskHandle xCalibrationTaskHandle;
 
 void InitInputs(void)
 {
@@ -176,7 +176,7 @@ void CalibrateInputLevels(Bool first)
 				TempCalibration.ch_top[i] = data;
 
 			if (data < InputCalibration.ch_bottom[i])
-				TempCalibration.ch_top[i] = data;
+				TempCalibration.ch_bottom[i] = data;
 		}
 	}
 }

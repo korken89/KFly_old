@@ -6,27 +6,31 @@
 #include "input.h"
 #include "pid.h"
 #include "fmath.h"
+#include "telemetry_commands.h"
 
 #define ACK		0x7F
 #define NACK	0x7E
 
+typedef enum {
+	PingLength = 0,
+	SaveToFlashLength = 0,
+	GetRegulatorDataLength = 0,
+	SetRegulatorDataLength = 36,
+	GetChannelMixLength = 0,
+	SetChannelMixLength = 32,
+	StartRCCalibrationLength = 0,
+	StopRCCalibrationLength = 0,
+	CalibrateRCCentersLength = 0,
+	GetRCCalibrationLength = 0,
+	SetRCCalibrationLength = 51,
+	GetRCValuesLength = 0
+} data_length;
+
 void InitTelemetry(void);
 void startTelemetry(void);
 void stopTelemetry(void);
+void SendACK(void);
 void rxWait(void);
-void rxNothing(void);
-void rxPing(void);
-void rxSaveToFlash(void);
-void rxGetRegulatorData(void);
-void rxSetRegulatorData(void);
-void rxGetChannelMix(void);
-void rxSetChannelMix(void);
-void rxSartRCCalibration(void);
-void rxStopRCCalibration(void);
-void rxCalibrateRCCenters(void);
-void rxGetRCCalibration(void);
-void rxSetRCCalibration(void);
-void rxGetRCValues(void);
 void GetDataCount(void);
 void GetData(void);
 void CheckCRC(void);

@@ -1,6 +1,9 @@
 #include "extint.h"
 
+/** Public Globals **/
 volatile input_data InputData;
+
+/** Private Globals **/
 volatile static uint8_t check = 0;
 volatile static Bool PWMorCPPM = FALSE;
 
