@@ -6,10 +6,11 @@ extern uint8_t data_array[64];
 
 extern input_data InputData;
 extern input_calibration InputCalibration;
-extern mix_data mixer;
-extern pid_data data_pitch;
-extern pid_data data_roll;
-extern pid_data data_yaw;
+extern limits_data FlightLimits;
+extern mix_data Mixer;
+extern pid_data DataPitch;
+extern pid_data DataRoll;
+extern pid_data DataYaw;
 
 void rxNothing(void)
 {
@@ -32,100 +33,114 @@ void rxSaveToFlash(void)
 void rxGetRegulatorData(void)
 {
 	int i = 0;
-	uint8_t data[39];
+	uint8_t data[45];
 	data[i++] = 0x03;
-	data[i++] = 36;
-	data[i++] = (uint8_t)data_pitch.r_kp;
-	data[i++] = (uint8_t)(data_pitch.r_kp>>8);
-	data[i++] = (uint8_t)data_pitch.r_ki;
-	data[i++] = (uint8_t)(data_pitch.r_ki>>8);
-	data[i++] = (uint8_t)data_pitch.r_imax;
-	data[i++] = (uint8_t)(data_pitch.r_imax>>8);
+	data[i++] = 42;
+	data[i++] = (uint8_t)FlightLimits.maxangle/FP_MUL;
+	data[i++] = (uint8_t)(FlightLimits.maxangle/FP_MUL>>8);
+	data[i++] = (uint8_t)FlightLimits.maxrate/FP_MUL;
+	data[i++] = (uint8_t)(FlightLimits.maxrate/FP_MUL>>8);
+	data[i++] = (uint8_t)FlightLimits.maxyawrate/FP_MUL;
+	data[i++] = (uint8_t)(FlightLimits.maxyawrate/FP_MUL>>8);
 
-	data[i++] = (uint8_t)data_roll.r_kp;
-	data[i++] = (uint8_t)(data_roll.r_kp>>8);
-	data[i++] = (uint8_t)data_roll.r_ki;
-	data[i++] = (uint8_t)(data_roll.r_ki>>8);
-	data[i++] = (uint8_t)data_roll.r_imax;
-	data[i++] = (uint8_t)(data_roll.r_imax>>8);
+	data[i++] = (uint8_t)DataPitch.r_kp;
+	data[i++] = (uint8_t)(DataPitch.r_kp>>8);
+	data[i++] = (uint8_t)DataPitch.r_ki;
+	data[i++] = (uint8_t)(DataPitch.r_ki>>8);
+	data[i++] = (uint8_t)DataPitch.r_imax;
+	data[i++] = (uint8_t)(DataPitch.r_imax>>8);
 
-	data[i++] = (uint8_t)data_yaw.r_kp;
-	data[i++] = (uint8_t)(data_yaw.r_kp>>8);
-	data[i++] = (uint8_t)data_yaw.r_ki;
-	data[i++] = (uint8_t)(data_yaw.r_ki>>8);
-	data[i++] = (uint8_t)data_yaw.r_imax;
-	data[i++] = (uint8_t)(data_yaw.r_imax>>8);
+	data[i++] = (uint8_t)DataRoll.r_kp;
+	data[i++] = (uint8_t)(DataRoll.r_kp>>8);
+	data[i++] = (uint8_t)DataRoll.r_ki;
+	data[i++] = (uint8_t)(DataRoll.r_ki>>8);
+	data[i++] = (uint8_t)DataRoll.r_imax;
+	data[i++] = (uint8_t)(DataRoll.r_imax>>8);
 
-	data[i++] = (uint8_t)data_pitch.a_kp;
-	data[i++] = (uint8_t)(data_pitch.a_kp>>8);
-	data[i++] = (uint8_t)data_pitch.a_ki;
-	data[i++] = (uint8_t)(data_pitch.a_ki>>8);
-	data[i++] = (uint8_t)data_pitch.a_imax;
-	data[i++] = (uint8_t)(data_pitch.a_imax>>8);
+	data[i++] = (uint8_t)DataYaw.r_kp;
+	data[i++] = (uint8_t)(DataYaw.r_kp>>8);
+	data[i++] = (uint8_t)DataYaw.r_ki;
+	data[i++] = (uint8_t)(DataYaw.r_ki>>8);
+	data[i++] = (uint8_t)DataYaw.r_imax;
+	data[i++] = (uint8_t)(DataYaw.r_imax>>8);
 
-	data[i++] = (uint8_t)data_roll.a_kp;
-	data[i++] = (uint8_t)(data_roll.a_kp>>8);
-	data[i++] = (uint8_t)data_roll.a_ki;
-	data[i++] = (uint8_t)(data_roll.a_ki>>8);
-	data[i++] = (uint8_t)data_roll.a_imax;
-	data[i++] = (uint8_t)(data_roll.a_imax>>8);
+	data[i++] = (uint8_t)DataPitch.a_kp;
+	data[i++] = (uint8_t)(DataPitch.a_kp>>8);
+	data[i++] = (uint8_t)DataPitch.a_ki;
+	data[i++] = (uint8_t)(DataPitch.a_ki>>8);
+	data[i++] = (uint8_t)DataPitch.a_imax;
+	data[i++] = (uint8_t)(DataPitch.a_imax>>8);
 
-	data[i++] = (uint8_t)data_yaw.a_kp;
-	data[i++] = (uint8_t)(data_yaw.a_kp>>8);
-	data[i++] = (uint8_t)data_yaw.a_ki;
-	data[i++] = (uint8_t)(data_yaw.a_ki>>8);
-	data[i++] = (uint8_t)data_yaw.a_imax;
-	data[i++] = (uint8_t)(data_yaw.a_imax>>8);
+	data[i++] = (uint8_t)DataRoll.a_kp;
+	data[i++] = (uint8_t)(DataRoll.a_kp>>8);
+	data[i++] = (uint8_t)DataRoll.a_ki;
+	data[i++] = (uint8_t)(DataRoll.a_ki>>8);
+	data[i++] = (uint8_t)DataRoll.a_imax;
+	data[i++] = (uint8_t)(DataRoll.a_imax>>8);
 
-	data[i++] = crc8(data, 38);
+	data[i++] = (uint8_t)DataYaw.a_kp;
+	data[i++] = (uint8_t)(DataYaw.a_kp>>8);
+	data[i++] = (uint8_t)DataYaw.a_ki;
+	data[i++] = (uint8_t)(DataYaw.a_ki>>8);
+	data[i++] = (uint8_t)DataYaw.a_imax;
+	data[i++] = (uint8_t)(DataYaw.a_imax>>8);
 
-	UART0_SendData(data, 39);
+	data[i++] = crc8(data, 44);
+
+	UART0_SendData(data, 45);
 }
 
 void rxSetRegulatorData(void)
 {
 	int i = 2;
 
-	data_pitch.r_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	FlightLimits.maxangle = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8)*FP_MUL;
 	i += 2;
-	data_pitch.r_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	FlightLimits.maxrate = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8)*FP_MUL;
 	i += 2;
-	data_pitch.r_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
-	i += 2;
-
-	data_roll.r_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
-	i += 2;
-	data_roll.r_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
-	i += 2;
-	data_roll.r_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	FlightLimits.maxyawrate = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8)*FP_MUL;
 	i += 2;
 
-	data_yaw.r_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	DataPitch.r_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
 	i += 2;
-	data_yaw.r_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	DataPitch.r_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
 	i += 2;
-	data_yaw.r_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
-	i += 2;
-
-	data_pitch.a_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
-	i += 2;
-	data_pitch.a_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
-	i += 2;
-	data_pitch.a_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	DataPitch.r_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
 	i += 2;
 
-	data_roll.a_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	DataRoll.r_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
 	i += 2;
-	data_roll.a_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	DataRoll.r_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
 	i += 2;
-	data_roll.a_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	DataRoll.r_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
 	i += 2;
 
-	data_yaw.a_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	DataYaw.r_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
 	i += 2;
-	data_yaw.a_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	DataYaw.r_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
 	i += 2;
-	data_yaw.a_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	DataYaw.r_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+
+	DataPitch.a_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	DataPitch.a_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	DataPitch.a_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+
+	DataRoll.a_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	DataRoll.a_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	DataRoll.a_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+
+	DataYaw.a_kp = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	DataYaw.a_ki = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
+	i += 2;
+	DataYaw.a_imax = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8);
 }
 
 void rxGetChannelMix(void)
@@ -138,7 +153,7 @@ void rxGetChannelMix(void)
 
 	for (int j = 0; j < 8; j++)
 		for (int k = 0; k < 4; k++)
-			data[i++] = (uint8_t)mixer.mix[j][k];
+			data[i++] = (uint8_t)Mixer.mix[j][k];
 
 	data[i++] = crc8(data, 34);
 
@@ -151,7 +166,7 @@ void rxSetChannelMix(void)
 
 	for (int j = 0; j < 8; j++)
 		for (int k = 0; k < 4; k++)
-			mixer.mix[j][k] = (fix32)((int8_t)data_array[i++]);
+			Mixer.mix[j][k] = (fix32)((int8_t)data_array[i++]);
 }
 
 

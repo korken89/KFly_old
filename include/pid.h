@@ -29,6 +29,12 @@
 #include "leds.h"
 
 typedef struct {
+	fix32 maxangle;
+	fix32 maxrate;
+	fix32 maxyawrate;
+} limits_data;
+
+typedef struct {
 	fix32 a_iState;
 	fix32 r_iState;
     fix32 a_ki;
@@ -46,6 +52,7 @@ typedef struct {
 void vTaskControlLoop(void *);
 void vTaskArmDisarm(void *);
 void InitControlLoops(void);
+void InitFlightLimits(void);
 void InitPID(uint8_t);
 void InitMixer(void);
 fix32 PIDUpdatePitch(kalman_data *);

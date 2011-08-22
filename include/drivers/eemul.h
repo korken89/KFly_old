@@ -1,7 +1,8 @@
 /* Data in EEPROM Emulation section
  * Data structure:
  * - ID:						1  word
- * - Version:					6 words
+ * - Version:					3 words
+ * - Flight Limits:				3 words
  * - PID Data: 					24 words
  * - Mixers Data: 				8 words
  * - Input Calibration Data:	25 words
@@ -18,9 +19,14 @@ typedef struct
 {
 	// Save ID and Version (strings, 4 characters per word)
 	__I  uint32_t ID;
-	__I  uint32_t VER[6];
+	__I  uint32_t VER[3];
 	
 	/* --- START REGULATOR CONSTANTS --- */
+	// Flight Limits
+	__I  uint32_t MAXANGLE;
+	__I  uint32_t MAXRATE;
+	__I  uint32_t MAXYAWRATE;
+
 	// Pitch regulator Coefficients
 	__I  uint32_t PITCH_R_KP;
 	__I  uint32_t PITCH_R_KI;
@@ -56,15 +62,15 @@ typedef struct
 	/* --- END MIXER CONSTANTS --- */
 	
 	/* --- START RC INPUT CAIBRATION CONSTANTS --- */
-	/* Role:
-	 * Bit 0-1 defines input role for Channel 1
-	 * Bit 2-3 defines input role for Channel 2
-	 * Bit 4-5 defines input role for Channel 3
-	 * Bit 6-7 defines input role for Channel 4
-	 * If the two bits equals	0: Throttle
-	 * 							1: Pitch
-	 * 							2: Roll
-	 * 							3: Yaw
+	/* Role		(3 bits):
+	 * Throttle	(0-2)
+	 * Pitch 	(3-5)
+	 * Roll		(6-8)
+	 * Yaw		(9-11)
+	 * Mode		(12-14)
+	 * Aux 1	(15-17)
+	 * Aux 2	(18-20)
+	 * Aux 3	(21-23)
 	 * 
 	 * INPUTCAL[n][0] is Top
 	 * INPUTCAL[n][1] is Center

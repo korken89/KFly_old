@@ -15,7 +15,7 @@ typedef enum {
 	PingLength = 0,
 	SaveToFlashLength = 0,
 	GetRegulatorDataLength = 0,
-	SetRegulatorDataLength = 36,
+	SetRegulatorDataLength = 42,
 	GetChannelMixLength = 0,
 	SetChannelMixLength = 32,
 	GetRCCalibrationLength = 0,

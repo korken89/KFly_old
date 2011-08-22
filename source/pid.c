@@ -1,10 +1,11 @@
 #include "pid.h"
 
 /** Public Globals **/
-volatile mix_data mixer;
-volatile pid_data data_pitch;
-volatile pid_data data_roll;
-volatile pid_data data_yaw;
+volatile limits_data FlightLimits;
+volatile mix_data Mixer;
+volatile pid_data DataPitch;
+volatile pid_data DataRoll;
+volatile pid_data DataYaw;
 
 /** Private Globals **/
 volatile static Bool bEnginesArmed = FALSE;
@@ -105,6 +106,7 @@ void InitControlLoops(void)
 	PWM_Init();
 	I2C0_Init();
 
+	InitFlightLimits();
 	/** Create FreeRTOS Tasks **/
 	xTaskCreate(vTaskControlLoop,
 				"Control",
@@ -121,92 +123,104 @@ void InitControlLoops(void)
 				NULL);
 }
 
+void InitFlightLimits(void)
+{
+	if (EEMUL_DATA->ID == KFLY_ID)
+	{
+
+	}
+	else
+	{
+
+	}
+}
+
 void InitPID(uint8_t channel)
 {
 	if (channel == ROLL_CHANNEL)
     {
-		data_roll.a_iState = 0;
-		data_roll.r_iState = 0;
+		DataRoll.a_iState = 0;
+		DataRoll.r_iState = 0;
 
 		if (EEMUL_DATA->ID == KFLY_ID)
 		{
-			data_roll.r_kp = (fix32)EEMUL_DATA->ROLL_R_KP;
-			data_roll.r_ki = (fix32)EEMUL_DATA->ROLL_R_KI;
+			DataRoll.r_kp = (fix32)EEMUL_DATA->ROLL_R_KP;
+			DataRoll.r_ki = (fix32)EEMUL_DATA->ROLL_R_KI;
 			
-			data_roll.a_kp = (fix32)EEMUL_DATA->ROLL_A_KP;
-			data_roll.a_ki = (fix32)EEMUL_DATA->ROLL_A_KI;
+			DataRoll.a_kp = (fix32)EEMUL_DATA->ROLL_A_KP;
+			DataRoll.a_ki = (fix32)EEMUL_DATA->ROLL_A_KI;
 			
-			data_roll.r_imax = (fix32)EEMUL_DATA->ROLL_R_IMAX;
-			data_roll.a_imax = (fix32)EEMUL_DATA->ROLL_A_IMAX;
+			DataRoll.r_imax = (fix32)EEMUL_DATA->ROLL_R_IMAX;
+			DataRoll.a_imax = (fix32)EEMUL_DATA->ROLL_A_IMAX;
 		}
 		else
 		{	
-			data_roll.r_kp = (fix32)(2.0f*FP_MUL);
-			data_roll.r_ki = (fix32)(0.0f*FP_MUL);
+			DataRoll.r_kp = (fix32)(2.0f*FP_MUL);
+			DataRoll.r_ki = (fix32)(0.0f*FP_MUL);
 			
-			data_roll.a_kp = (fix32)(0.6f*FP_MUL);
-			data_roll.a_ki = (fix32)(0.0f*FP_MUL);
+			DataRoll.a_kp = (fix32)(0.6f*FP_MUL);
+			DataRoll.a_ki = (fix32)(0.0f*FP_MUL);
 			
-			data_roll.r_imax = (fix32)(30.0f*FP_MUL);
-			data_roll.a_imax = (fix32)(30.0f*FP_MUL);
+			DataRoll.r_imax = (fix32)(30.0f*FP_MUL);
+			DataRoll.a_imax = (fix32)(30.0f*FP_MUL);
 		}
 	}
 	
 	else if (channel == PITCH_CHANNEL)
     {
-		data_pitch.a_iState = 0;
-		data_pitch.r_iState = 0;
+		DataPitch.a_iState = 0;
+		DataPitch.r_iState = 0;
 
 		if (EEMUL_DATA->ID == KFLY_ID)
 		{
-			data_pitch.r_kp = (fix32)EEMUL_DATA->PITCH_R_KP;
-			data_pitch.r_ki = (fix32)EEMUL_DATA->PITCH_R_KI;
+			DataPitch.r_kp = (fix32)EEMUL_DATA->PITCH_R_KP;
+			DataPitch.r_ki = (fix32)EEMUL_DATA->PITCH_R_KI;
 			
-			data_pitch.a_kp = (fix32)EEMUL_DATA->PITCH_A_KP;
-			data_pitch.a_ki = (fix32)EEMUL_DATA->PITCH_A_KI;
+			DataPitch.a_kp = (fix32)EEMUL_DATA->PITCH_A_KP;
+			DataPitch.a_ki = (fix32)EEMUL_DATA->PITCH_A_KI;
 			
-			data_pitch.r_imax = (fix32)EEMUL_DATA->PITCH_R_IMAX;
-			data_pitch.a_imax = (fix32)EEMUL_DATA->PITCH_A_IMAX;
+			DataPitch.r_imax = (fix32)EEMUL_DATA->PITCH_R_IMAX;
+			DataPitch.a_imax = (fix32)EEMUL_DATA->PITCH_A_IMAX;
 		}
 		else
 		{	
-			data_pitch.r_kp = (fix32)(2.0f*FP_MUL);
-			data_pitch.r_ki = (fix32)(0.0f*FP_MUL);
+			DataPitch.r_kp = (fix32)(2.0f*FP_MUL);
+			DataPitch.r_ki = (fix32)(0.0f*FP_MUL);
 			
-			data_pitch.a_kp = (fix32)(0.6f*FP_MUL);
-			data_pitch.a_ki = (fix32)(0.0f*FP_MUL);
+			DataPitch.a_kp = (fix32)(0.6f*FP_MUL);
+			DataPitch.a_ki = (fix32)(0.0f*FP_MUL);
 			
-			data_pitch.r_imax = (fix32)(30.0f*FP_MUL);
-			data_pitch.a_imax = (fix32)(30.0f*FP_MUL);
+			DataPitch.r_imax = (fix32)(30.0f*FP_MUL);
+			DataPitch.a_imax = (fix32)(30.0f*FP_MUL);
 		}
 	}
 	
 	else if (channel == YAW_CHANNEL)
     {
-		data_yaw.a_iState = 0;
-		data_yaw.r_iState = 0;
+		DataYaw.a_iState = 0;
+		DataYaw.r_iState = 0;
 
 		if (EEMUL_DATA->ID == KFLY_ID)
 		{
-			data_yaw.r_kp = (fix32)EEMUL_DATA->YAW_R_KP;
-			data_yaw.r_ki = (fix32)EEMUL_DATA->YAW_R_KI;
+			DataYaw.r_kp = (fix32)EEMUL_DATA->YAW_R_KP;
+			DataYaw.r_ki = (fix32)EEMUL_DATA->YAW_R_KI;
 			
-			data_yaw.a_kp = (fix32)EEMUL_DATA->YAW_A_KP;
-			data_yaw.a_ki = (fix32)EEMUL_DATA->YAW_A_KI;
+			DataYaw.a_kp = (fix32)EEMUL_DATA->YAW_A_KP;
+			DataYaw.a_ki = (fix32)EEMUL_DATA->YAW_A_KI;
 			
-			data_yaw.r_imax = (fix32)EEMUL_DATA->YAW_R_IMAX;
-			data_yaw.a_imax = (fix32)EEMUL_DATA->YAW_A_IMAX;
+			DataYaw.r_imax = (fix32)EEMUL_DATA->YAW_R_IMAX;
+			DataYaw.a_imax = (fix32)EEMUL_DATA->YAW_A_IMAX;
 		}
 		else
 		{	
-			data_yaw.r_kp = (fix32)(2.0f*FP_MUL);
-			data_yaw.r_ki = (fix32)(0.0f*FP_MUL);
+			DataYaw.r_kp = (fix32)(2.0f*FP_MUL);
+			DataYaw.r_ki = (fix32)(0.0f*FP_MUL);
 			
-			data_yaw.a_kp = (fix32)(0.6f*FP_MUL);
-			data_yaw.a_ki = (fix32)(0.0f*FP_MUL);
+			DataYaw.a_kp = (fix32)(0.6f*FP_MUL);
+			DataYaw.a_ki = (fix32)(0.0f*FP_MUL);
 			
-			data_yaw.r_imax = (fix32)(30.0f*FP_MUL);
-			data_yaw.a_imax = (fix32)(30.0f*FP_MUL);
+			DataYaw.r_imax = (fix32)(30.0f*FP_MUL);
+			DataYaw.a_imax = (fix32)(30.0f*FP_MUL);
 		}
 	}	
 }
@@ -217,13 +231,13 @@ void InitMixer(void)
 	{
 		for (int i = 0; i < 8; i++)
 			for (int j = 0; j < 4; j++)
-				mixer.mix[i][j] = (fix8)EEMUL_DATA->MIX[i][j];
+				Mixer.mix[i][j] = (fix8)EEMUL_DATA->MIX[i][j];
 	}
 	else
 	{
 		for (int i = 0; i < 8; i++)
 			for (int j = 0; j < 4; j++)
-				mixer.mix[i][j] = 0;
+				Mixer.mix[i][j] = 0;
 	}
 }
 
@@ -236,14 +250,14 @@ fix32 PIDUpdatePitch(kalman_data *data)
 
 	/* Angle regulator starts here! */
 	angle_error = fix32Mul((fix32)(MAX_ANGLE*FP_MUL), input) - (fix32)(data->x1*FP_MUL);
-	data_pitch.a_iState += fix32Mul(angle_error, data_pitch.a_ki);
+	DataPitch.a_iState += fix32Mul(angle_error, DataPitch.a_ki);
 
-	if (data_pitch.a_iState > data_pitch.a_imax)
-		data_pitch.a_iState = data_pitch.a_imax;
-	else if (data_pitch.a_iState < -data_pitch.a_imax)
-		data_pitch.a_iState = -data_pitch.a_imax;
+	if (DataPitch.a_iState > DataPitch.a_imax)
+		DataPitch.a_iState = DataPitch.a_imax;
+	else if (DataPitch.a_iState < -DataPitch.a_imax)
+		DataPitch.a_iState = -DataPitch.a_imax;
 
-	rate_aim = data_pitch.a_iState + fix32Mul(angle_error, data_pitch.a_kp);
+	rate_aim = DataPitch.a_iState + fix32Mul(angle_error, DataPitch.a_kp);
 
 	if (rate_aim > (fix32)(MAX_RATE*FP_MUL))
 		rate_aim = (fix32)(MAX_RATE*FP_MUL);
@@ -252,14 +266,14 @@ fix32 PIDUpdatePitch(kalman_data *data)
 
 	/* Rate regulator starts here! */
 	rate_error = rate_aim - (fix32)((data->x2 - data->x3)*FP_MUL);
-	data_pitch.r_iState = data_pitch.r_iState + fix32Mul(rate_error, data_pitch.r_ki);
+	DataPitch.r_iState = DataPitch.r_iState + fix32Mul(rate_error, DataPitch.r_ki);
 
-	if (data_pitch.r_iState > data_pitch.r_imax)
-		data_pitch.r_iState = data_pitch.r_imax;
-	else if (data_pitch.r_iState < -data_pitch.r_imax)
-		data_pitch.r_iState = -data_pitch.r_imax;
+	if (DataPitch.r_iState > DataPitch.r_imax)
+		DataPitch.r_iState = DataPitch.r_imax;
+	else if (DataPitch.r_iState < -DataPitch.r_imax)
+		DataPitch.r_iState = -DataPitch.r_imax;
 
-	return data_pitch.r_iState + fix32Mul(rate_error, data_pitch.r_kp);
+	return DataPitch.r_iState + fix32Mul(rate_error, DataPitch.r_kp);
 }
 
 fix32 PIDUpdateRoll(kalman_data *data)
@@ -271,14 +285,14 @@ fix32 PIDUpdateRoll(kalman_data *data)
 		
 	/* Angle regulator starts here! */
 	angle_error = fix32Mul((fix32)(MAX_ANGLE*FP_MUL), input) - (fix32)(data->x1*FP_MUL);
-	data_roll.a_iState += fix32Mul(angle_error, data_roll.a_ki);
+	DataRoll.a_iState += fix32Mul(angle_error, DataRoll.a_ki);
 	
-	if (data_roll.a_iState > data_roll.a_imax)
-		data_roll.a_iState = data_roll.a_imax;
-	else if (data_roll.a_iState < -data_roll.a_imax)
-		data_roll.a_iState = -data_roll.a_imax;
+	if (DataRoll.a_iState > DataRoll.a_imax)
+		DataRoll.a_iState = DataRoll.a_imax;
+	else if (DataRoll.a_iState < -DataRoll.a_imax)
+		DataRoll.a_iState = -DataRoll.a_imax;
 	
-	rate_aim = data_roll.a_iState + fix32Mul(angle_error, data_roll.a_kp);
+	rate_aim = DataRoll.a_iState + fix32Mul(angle_error, DataRoll.a_kp);
 	
 	if (rate_aim > (fix32)(MAX_RATE*FP_MUL))
 		rate_aim = (fix32)(MAX_RATE*FP_MUL);
@@ -287,14 +301,14 @@ fix32 PIDUpdateRoll(kalman_data *data)
 	
 	/* Rate regulator starts here! */
 	rate_error = rate_aim - (fix32)((data->x2 - data->x3)*FP_MUL);
-	data_roll.r_iState = data_roll.r_iState + fix32Mul(rate_error, data_roll.r_ki);
+	DataRoll.r_iState = DataRoll.r_iState + fix32Mul(rate_error, DataRoll.r_ki);
 	
-	if (data_roll.r_iState > data_roll.r_imax)
-		data_roll.r_iState = data_roll.r_imax;
-	else if (data_roll.r_iState < -data_roll.r_imax)
-		data_roll.r_iState = -data_roll.r_imax;
+	if (DataRoll.r_iState > DataRoll.r_imax)
+		DataRoll.r_iState = DataRoll.r_imax;
+	else if (DataRoll.r_iState < -DataRoll.r_imax)
+		DataRoll.r_iState = -DataRoll.r_imax;
 		
-	return data_roll.r_iState + fix32Mul(rate_error, data_roll.r_kp);
+	return DataRoll.r_iState + fix32Mul(rate_error, DataRoll.r_kp);
 }
  
 fix32 PIDUpdateYaw(float yawrate)
@@ -306,14 +320,14 @@ fix32 PIDUpdateYaw(float yawrate)
 	
 	/* Rate regulator starts here! */
 	rate_error = rate_aim - (fix32)(yawrate*FP_MUL);
-	data_yaw.r_iState = data_yaw.r_iState + fix32Mul(rate_error, data_yaw.r_ki);
+	DataYaw.r_iState = DataYaw.r_iState + fix32Mul(rate_error, DataYaw.r_ki);
 	
-	if (data_yaw.r_iState > data_yaw.r_imax)
-		data_yaw.r_iState = data_yaw.r_imax;
-	else if (data_yaw.r_iState < -data_yaw.r_imax)
-		data_yaw.r_iState = -data_yaw.r_imax;
+	if (DataYaw.r_iState > DataYaw.r_imax)
+		DataYaw.r_iState = DataYaw.r_imax;
+	else if (DataYaw.r_iState < -DataYaw.r_imax)
+		DataYaw.r_iState = -DataYaw.r_imax;
 		
-	return data_yaw.r_iState + fix32Mul(rate_error, data_yaw.r_kp);
+	return DataYaw.r_iState + fix32Mul(rate_error, DataYaw.r_kp);
 }
 
 void UpdOutputs(kalman_data *data_xz, kalman_data *data_yz, float gyro_tmp)
@@ -332,8 +346,8 @@ void UpdOutputs(kalman_data *data_xz, kalman_data *data_yz, float gyro_tmp)
 			
 			for (int i = 0; i < 8; i++)		// Manual fixed point multiplication and FP to INT
 			{
-				PWM_setOutput((int)((thr_base*mixer.mix[i][0] + pid_pitch*mixer.mix[i][1] + \
-								pid_roll*mixer.mix[i][2] + pid_yaw*mixer.mix[i][3]) >> 15), i);
+				PWM_setOutput((int)((thr_base*Mixer.mix[i][0] + pid_pitch*Mixer.mix[i][1] + \
+								pid_roll*Mixer.mix[i][2] + pid_yaw*Mixer.mix[i][3]) >> 15), i);
 			}
 		}
 		
