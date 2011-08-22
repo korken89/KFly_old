@@ -78,32 +78,17 @@ void rxWait(void)
 			data_len = SetChannelMixLength;
 			break;
 		
-		case 0x07: // StartRCCalibration
-			parser = rxSartRCCalibration;
-			data_len = StartRCCalibrationLength;
-			break;
-		
-		case 0x08: // StopRCCalibration
-			parser = rxStopRCCalibration;
-			data_len = StopRCCalibrationLength;
-			break;
-		
-		case 0x09: // CalibrateRCCenters
-			data_len = CalibrateRCCentersLength;
-			parser = rxCalibrateRCCenters;
-			break;
-		
-		case 0x0A: // GetRCCalibration
+		case 0x07: // GetRCCalibration
 			parser = rxGetRCCalibration;
 			data_len = GetRCCalibrationLength;
 			break;
 		
-		case 0x0B: // SetRCCalibration
+		case 0x08: // SetRCCalibration
 			parser = rxSetRCCalibration;
 			data_len = SetRCCalibrationLength;
 			break;
-		
-		case 0x0C: // GetRCValues
+
+		case 0x09: // GetRCValues
 			parser = rxGetRCValues;
 			data_len = GetRCValuesLength;
 			break;

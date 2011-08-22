@@ -16,20 +16,8 @@ typedef struct
 	int32_t ch_bottom[8];
 } input_calibration;
 
-typedef enum {
-	NoCommand = 0,
-	SaveCalibratedData,
-	CalibrateInputs,
-	CalibrateCenter
-} cal_state;
-
-void vTaskCalibrate(void *);
-void RunCalibrationState(cal_state);
 void InitInputs(void);
 uint8_t GetInputStatus(void);
-void CalibrateInputLevels(Bool);
-void CalibrateCenterLevels(int32_t);
-void SaveCalibratedDataToRAM(void);
 fix32 GetInputLevel(uint8_t);
 int32_t GetRawInputLevel(uint8_t);
 

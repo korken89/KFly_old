@@ -5,7 +5,7 @@ extern uint8_t data_cnt;
 extern uint8_t data_array[64];
 
 extern input_data InputData;
-extern input_calibration TempCalibration;
+extern input_calibration InputCalibration;
 extern mix_data mixer;
 extern pid_data data_pitch;
 extern pid_data data_roll;
@@ -154,41 +154,27 @@ void rxSetChannelMix(void)
 			mixer.mix[j][k] = (fix32)((int8_t)data_array[i++]);
 }
 
-void rxSartRCCalibration(void)
-{
-	RunCalibrationState(CalibrateInputs);
-}
-
-void rxStopRCCalibration(void)
-{
-	RunCalibrationState(NoCommand);
-}
-
-void rxCalibrateRCCenters(void)
-{
-	RunCalibrationState(CalibrateCenter);
-}
 
 void rxGetRCCalibration(void)
 {
 	int i = 0;
 	uint8_t data[54];
 
-	data[i++] = 0x0A;
+	data[i++] = 0x07;
 	data[i++] = 51;
 
-	data[i++] = (uint8_t)TempCalibration.role;
-	data[i++] = (uint8_t)(TempCalibration.role >> 8);
-	data[i++] = (uint8_t)(TempCalibration.role >> 16);
+	data[i++] = (uint8_t)InputCalibration.role;
+	data[i++] = (uint8_t)(InputCalibration.role >> 8);
+	data[i++] = (uint8_t)(InputCalibration.role >> 16);
 
 	for (int j = 0; j < 8; j++)
 	{
-		data[i++] = (uint8_t)TempCalibration.ch_top[j];
-		data[i++] = (uint8_t)(TempCalibration.ch_top[j] >> 8);
-		data[i++] = (uint8_t)TempCalibration.ch_center[j];
-		data[i++] = (uint8_t)(TempCalibration.ch_center[j] >> 8);
-		data[i++] = (uint8_t)TempCalibration.ch_bottom[j];
-		data[i++] = (uint8_t)(TempCalibration.ch_bottom[j] >> 8);
+		data[i++] = (uint8_t)InputCalibration.ch_top[j];
+		data[i++] = (uint8_t)(InputCalibration.ch_top[j] >> 8);
+		data[i++] = (uint8_t)InputCalibration.ch_center[j];
+		data[i++] = (uint8_t)(InputCalibration.ch_center[j] >> 8);
+		data[i++] = (uint8_t)InputCalibration.ch_bottom[j];
+		data[i++] = (uint8_t)(InputCalibration.ch_bottom[j] >> 8);
 	}
 
 	data[i++] = crc8(data, 53);
@@ -199,18 +185,18 @@ void rxSetRCCalibration(void)
 {
 	int i = 2;
 
-	TempCalibration.role = (uint32_t)data_array[i++];
-	TempCalibration.role |= ((uint32_t)data_array[i++] << 8);
-	TempCalibration.role |= ((uint32_t)data_array[i++] << 16);
+	InputCalibration.role = (uint32_t)data_array[i++];
+	InputCalibration.role |= ((uint32_t)data_array[i++] << 8);
+	InputCalibration.role |= ((uint32_t)data_array[i++] << 16);
 
 	for (int j = 0; j < 8; j++)
 	{
-		TempCalibration.ch_top[j] = (uint32_t)data[i++];
-		TempCalibration.ch_top[j] |= ((uint32_t)data[i++] << 8);
-		TempCalibration.ch_center[j] = (uint32_t)data[i++];
-		TempCalibration.ch_center[j] |= ((uint32_t)data[i++] << 8);
-		TempCalibration.ch_bottom[j] = (uint32_t)data[i++];
-		TempCalibration.ch_bottom[j] |= ((uint32_t)data[i++] << 8);
+		InputCalibration.ch_top[j] = (uint32_t)data_array[i++];
+		InputCalibration.ch_top[j] |= ((uint32_t)data_array[i++] << 8);
+		InputCalibration.ch_center[j] = (uint32_t)data_array[i++];
+		InputCalibration.ch_center[j] |= ((uint32_t)data_array[i++] << 8);
+		InputCalibration.ch_bottom[j] = (uint32_t)data_array[i++];
+		InputCalibration.ch_bottom[j] |= ((uint32_t)data_array[i++] << 8);
 	}
 }
 
@@ -219,7 +205,7 @@ void rxGetRCValues(void)
 	int i = 0;
 	uint8_t data[19];
 
-	data[i++] = 0x0C;
+	data[i++] = 0x09;
 	data[i++] = 16;
 
 	for (int j = 0; j < 8; j++)
@@ -228,6 +214,6 @@ void rxGetRCValues(void)
 		data[i++] = (uint8_t)(InputData.value[j] >> 8);
 	}
 
-	data[i++] = crc8(data, 53);
-	UART0_SendData(data, 54);
+	data[i++] = crc8(data, 18);
+	UART0_SendData(data, 19);
 }

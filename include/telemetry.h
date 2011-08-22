@@ -18,9 +18,6 @@ typedef enum {
 	SetRegulatorDataLength = 36,
 	GetChannelMixLength = 0,
 	SetChannelMixLength = 32,
-	StartRCCalibrationLength = 0,
-	StopRCCalibrationLength = 0,
-	CalibrateRCCentersLength = 0,
 	GetRCCalibrationLength = 0,
 	SetRCCalibrationLength = 51,
 	GetRCValuesLength = 0

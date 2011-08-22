@@ -4,12 +4,10 @@
 extern input_data InputData;
 
 /** Public Globals **/
-volatile input_calibration TempCalibration;
+volatile input_calibration InputCalibration;
 
 /** Private Globals **/
-volatile static input_calibration InputCalibration;
 volatile static Bool CalibrateCenters = TRUE;
-volatile static cal_state CalibrationState = NoCommand;
 volatile static xTaskHandle xCalibrationTaskHandle;
 
 void InitInputs(void)
@@ -70,137 +68,8 @@ void InitInputs(void)
 		InputCalibration.ch_center[2] = 1000;	// Channel 3 is throttle
 	}	
 	
-	// Copy data to TempCalibration
-	for (int i = 0; i < 8; i++)
-	{
-		TempCalibration.ch_top[i] = InputCalibration.ch_top[i];
-		TempCalibration.ch_center[i] = InputCalibration.ch_center[i];
-		TempCalibration.ch_bottom[i] = InputCalibration.ch_bottom[i];
-	}
-	
 	// Initialize External Interrupts
 	EINT_Init();
-
-	// Create Calibration Task and put it in Suspended mode
-	xTaskCreate(vTaskCalibrate,
-				"Calibration",
-				80,
-				NULL,
-				2,
-				xCalibrationTaskHandle);
-
-	vTaskSuspend(xCalibrationTaskHandle);
-}
-
-/**
- * RC Input Calibration Task for FreeRTOS
- **/
-void vTaskCalibrate(void *pvParameters)
-{
-	int runs = 0;
-
-	while (1)
-	{
-		if (CalibrationState == SaveCalibratedData)
-		{
-			SaveCalibratedDataToRAM();
-			CalibrationState = NoCommand;
-			vTaskSuspend(xCalibrationTaskHandle);
-		}
-
-		else if (CalibrationState == CalibrateCenter)
-		{
-			CalibrateCenterLevels(runs++);
-			if (runs > 10)
-			{
-				runs = 0;
-				vTaskSuspend(xCalibrationTaskHandle);
-			}
-		}
-
-		else if (CalibrationState == CalibrateInputs)
-			CalibrateInputLevels(FALSE);
-
-		else
-			vTaskSuspend(xCalibrationTaskHandle);
-
-		vTaskDelay(25 / portTICK_RATE_MS);
-	}
-}
-
-void RunCalibrationState(cal_state state)
-{
-	CalibrationState = state;
-
-	if (state == CalibrateInputs)
-		CalibrateInputLevels(TRUE);
-
-	if (state == NoCommand)
-		vTaskSuspend(xCalibrationTaskHandle);
-	else
-		xTaskResumeFromISR(xCalibrationTaskHandle);
-}
-
-/**
- * Copy calibrated data to the InputCalibration struct
- **/
-void SaveCalibratedDataToRAM(void)
-{
-	for (int i = 0; i < 8; i++)
-	{
-		InputCalibration.ch_top[i] = TempCalibration.ch_top[i];
-		InputCalibration.ch_center[i] = TempCalibration.ch_center[i];
-		InputCalibration.ch_bottom[i] = TempCalibration.ch_bottom[i];
-	}
-}
-
-/**
- * Calibrates the top and bottom level of the inputs.
- **/
-void CalibrateInputLevels(Bool first)
-{
-	if (first == TRUE)
-	{
-		for (int i = 0; i < 8; i++)
-		{
-			TempCalibration.ch_top[i] = TempCalibration.ch_center[i];
-			TempCalibration.ch_bottom[i] = TempCalibration.ch_center[i];
-		}
-	}
-	else
-	{
-		for (int i = 0; i < 8; i++)
-		{
-			int32_t data = GetRawInputLevel(i);
-			if (data > TempCalibration.ch_top[i])
-				TempCalibration.ch_top[i] = data;
-
-			if (data < InputCalibration.ch_bottom[i])
-				TempCalibration.ch_bottom[i] = data;
-		}
-	}
-}
-
-/**
- * Calibrates the center level of the inputs.
- **/
-void CalibrateCenterLevels(int32_t runs)
-{
-	static int32_t tempcal[8];
-	if (runs > 9)
-	{
-		for (int i = 0; i < 8; i++)
-		{
-			TempCalibration.ch_center[i] = tempcal[i]/runs;
-			tempcal[i] = 0;
-		}
-	}
-	else
-	{
-		for (int i = 0; i < 8; i++)
-			tempcal[i] += GetRawInputLevel(i);
-	}
-
 }
 
 /**
