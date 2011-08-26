@@ -127,11 +127,15 @@ void InitFlightLimits(void)
 {
 	if (EEMUL_DATA->ID == KFLY_ID)
 	{
-
+		FlightLimits.maxangle = (int32_t)EEMUL_DATA->MAXANGLE;
+		FlightLimits.maxrate = (int32_t)EEMUL_DATA->MAXRATE;
+		FlightLimits.maxyawrate = (int32_t)EEMUL_DATA->MAXYAWRATE;
 	}
 	else
 	{
-
+		FlightLimits.maxangle = 30*FP_MUL;
+		FlightLimits.maxrate = 150*FP_MUL;
+		FlightLimits.maxyawrate = 90*FP_MUL;
 	}
 }
 
@@ -249,7 +253,7 @@ fix32 PIDUpdatePitch(kalman_data *data)
 	input = GetInputLevel(PITCH_CHANNEL);
 
 	/* Angle regulator starts here! */
-	angle_error = fix32Mul((fix32)(MAX_ANGLE*FP_MUL), input) - (fix32)(data->x1*FP_MUL);
+	angle_error = fix32Mul(FlightLimits.maxangle, input) - (fix32)(data->x1*FP_MUL);
 	DataPitch.a_iState += fix32Mul(angle_error, DataPitch.a_ki);
 
 	if (DataPitch.a_iState > DataPitch.a_imax)
@@ -259,10 +263,10 @@ fix32 PIDUpdatePitch(kalman_data *data)
 
 	rate_aim = DataPitch.a_iState + fix32Mul(angle_error, DataPitch.a_kp);
 
-	if (rate_aim > (fix32)(MAX_RATE*FP_MUL))
-		rate_aim = (fix32)(MAX_RATE*FP_MUL);
-	else if (rate_aim < -(fix32)(MAX_RATE*FP_MUL))
-		rate_aim = -(fix32)(MAX_RATE*FP_MUL);
+	if (rate_aim > FlightLimits.maxrate)
+		rate_aim = FlightLimits.maxrate;
+	else if (rate_aim < -FlightLimits.maxrate)
+		rate_aim = -FlightLimits.maxrate;
 
 	/* Rate regulator starts here! */
 	rate_error = rate_aim - (fix32)((data->x2 - data->x3)*FP_MUL);
@@ -284,7 +288,7 @@ fix32 PIDUpdateRoll(kalman_data *data)
 	input = GetInputLevel(ROLL_CHANNEL);
 		
 	/* Angle regulator starts here! */
-	angle_error = fix32Mul((fix32)(MAX_ANGLE*FP_MUL), input) - (fix32)(data->x1*FP_MUL);
+	angle_error = fix32Mul(FlightLimits.maxangle, input) - (fix32)(data->x1*FP_MUL);
 	DataRoll.a_iState += fix32Mul(angle_error, DataRoll.a_ki);
 	
 	if (DataRoll.a_iState > DataRoll.a_imax)
@@ -294,10 +298,10 @@ fix32 PIDUpdateRoll(kalman_data *data)
 	
 	rate_aim = DataRoll.a_iState + fix32Mul(angle_error, DataRoll.a_kp);
 	
-	if (rate_aim > (fix32)(MAX_RATE*FP_MUL))
-		rate_aim = (fix32)(MAX_RATE*FP_MUL);
-	else if (rate_aim < -(fix32)(MAX_RATE*FP_MUL))
-		rate_aim = -(fix32)(MAX_RATE*FP_MUL);
+	if (rate_aim > FlightLimits.maxrate)
+		rate_aim = FlightLimits.maxrate;
+	else if (rate_aim < -FlightLimits.maxrate)
+		rate_aim = -FlightLimits.maxrate;
 	
 	/* Rate regulator starts here! */
 	rate_error = rate_aim - (fix32)((data->x2 - data->x3)*FP_MUL);
@@ -316,7 +320,7 @@ fix32 PIDUpdateYaw(float yawrate)
 	fix32 rate_error, rate_aim, input;
 	
 	input = GetInputLevel(YAW_CHANNEL);
-	rate_aim = fix32Mul(input, (fix32)(MAX_YAW_RATE*FP_MUL));
+	rate_aim = fix32Mul(input, FlightLimits.maxyawrate);
 	
 	/* Rate regulator starts here! */
 	rate_error = rate_aim - (fix32)(yawrate*FP_MUL);

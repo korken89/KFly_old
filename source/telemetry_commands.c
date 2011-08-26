@@ -19,7 +19,6 @@ void rxNothing(void)
 
 void rxPing(void)
 {
-	UART0_SetReceivedIRQHandler(rxWait);
 	uint8_t data[] = {1, 0};
 	uint8_t msg[] = {1, 0, crc8(data, 2)};
 	UART0_SendData(msg, 3);
@@ -36,6 +35,8 @@ void rxGetRegulatorData(void)
 	uint8_t data[45];
 	data[i++] = 0x03;
 	data[i++] = 42;
+
+	// From FP to INT
 	data[i++] = (uint8_t)FlightLimits.maxangle/FP_MUL;
 	data[i++] = (uint8_t)(FlightLimits.maxangle/FP_MUL>>8);
 	data[i++] = (uint8_t)FlightLimits.maxrate/FP_MUL;
@@ -94,6 +95,7 @@ void rxSetRegulatorData(void)
 {
 	int i = 2;
 
+	//From INT to FP
 	FlightLimits.maxangle = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8)*FP_MUL;
 	i += 2;
 	FlightLimits.maxrate = (fix32)((uint16_t)data_array[i] | (uint16_t)data_array[i+1]<<8)*FP_MUL;
