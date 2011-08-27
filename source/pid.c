@@ -133,9 +133,9 @@ void InitFlightLimits(void)
 	}
 	else
 	{
-		FlightLimits.maxangle = 30*FP_MUL;
-		FlightLimits.maxrate = 150*FP_MUL;
-		FlightLimits.maxyawrate = 90*FP_MUL;
+		FlightLimits.maxangle = (fix32)MAX_ANGLE*FP_MUL;
+		FlightLimits.maxrate = (fix32)MAX_RATE*FP_MUL;
+		FlightLimits.maxyawrate = (fix32)MAX_YAW_RATE*FP_MUL;
 	}
 }
 

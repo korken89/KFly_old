@@ -12,12 +12,11 @@
 #define AUX3_CHANNEL		21
 #define CHANNELMASK			(0x0F)
 
+// Default values
 // Maximum angle of the aircraft in stability mode (in deg)
 #define MAX_ANGLE		35.0f
-
 // Maximum angular rate of the aircraft in acrobatic mode (in deg/s)
 #define MAX_RATE		180.0f
-
 // Maximum angular rate of the aircraft in Yaw (in deg/s)
 #define MAX_YAW_RATE	90.0f
 

@@ -37,11 +37,11 @@ void rxGetRegulatorData(void)
 	data[i++] = 42;
 
 	// From FP to INT
-	data[i++] = (uint8_t)FlightLimits.maxangle/FP_MUL;
+	data[i++] = (uint8_t)(FlightLimits.maxangle/FP_MUL);
 	data[i++] = (uint8_t)(FlightLimits.maxangle/FP_MUL>>8);
-	data[i++] = (uint8_t)FlightLimits.maxrate/FP_MUL;
+	data[i++] = (uint8_t)(FlightLimits.maxrate/FP_MUL);
 	data[i++] = (uint8_t)(FlightLimits.maxrate/FP_MUL>>8);
-	data[i++] = (uint8_t)FlightLimits.maxyawrate/FP_MUL;
+	data[i++] = (uint8_t)(FlightLimits.maxyawrate/FP_MUL);
 	data[i++] = (uint8_t)(FlightLimits.maxyawrate/FP_MUL>>8);
 
 	data[i++] = (uint8_t)DataPitch.r_kp;
