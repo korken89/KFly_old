@@ -16,14 +16,17 @@ void ReadAcc(float *data)
 	BMA180_BurstRead(temp, NULL);
 	
 	int32_t rate[3];
-	rate[0] = (int32_t)((temp[1]<<8)|temp[0]);
-	rate[1] = (int32_t)((temp[3]<<8)|temp[2]);
-	rate[2] = (int32_t)((temp[5]<<8)|temp[4]);
-	
+
+	// Cast to int16_t to get correct types
+	rate[0] = (int16_t)((temp[1]<<8)|temp[0]);
+	rate[1] = (int16_t)((temp[3]<<8)|temp[2]);
+	rate[2] = (int16_t)((temp[5]<<8)|temp[4]);
+
+	// Shift away the new_data bit and 0-bit (Page 22 of the BMA180 data sheet)
 	rate[0] >>= 2;
 	rate[1] >>= 2;
 	rate[2] >>= 2;
-	
+
 	// X-axis
 	#if configFLIP_ACC_X == 0
 		*data = (float)rate[0];
@@ -56,9 +59,11 @@ void ReadGyroRate(float *data)
 	ITG3200_BurstRead(temp, NULL);
 	
 	int32_t rate[3];
-	rate[0] = (int32_t)((temp[0]<<8)|temp[1]);
-	rate[1] = (int32_t)((temp[2]<<8)|temp[3]);
-	rate[2] = (int32_t)((temp[4]<<8)|temp[5]);
+
+	// Cast to int16_t to get correct types
+	rate[0] = (int16_t)((temp[0]<<8)|temp[1]);
+	rate[1] = (int16_t)((temp[2]<<8)|temp[3]);
+	rate[2] = (int16_t)((temp[4]<<8)|temp[5]);
 	
 	// X-axis
 	#if configFLIP_GYRO_X == 0

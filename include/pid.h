@@ -1,7 +1,6 @@
 #ifndef PID_H
 #define PID_H
 
-
 /* Standard includes */
 #include <stdint.h>
 #include <stdio.h>
@@ -27,6 +26,16 @@
 #include "pwm.h"
 #include "sensors.h"
 #include "leds.h"
+
+typedef struct {
+	int32_t debug1;
+	int32_t debug2;
+	int32_t debug3;
+	int32_t debug4;
+	int32_t debug5;
+	int32_t debug6;
+} debug_data;
+
 
 typedef struct {
 	fix32 maxangle;

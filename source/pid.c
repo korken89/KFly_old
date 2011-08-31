@@ -11,6 +11,8 @@ volatile pid_data DataYaw;
 volatile static Bool bEnginesArmed = FALSE;
 volatile static Bool bPIDArmed = FALSE;
 
+volatile debug_data DebugStore;
+
 void vTaskControlLoop(void *pvParameters)
 {
 	portTickType xLastWakeTime = xTaskGetTickCount();
@@ -127,9 +129,9 @@ void InitFlightLimits(void)
 {
 	if (EEMUL_DATA->ID == KFLY_ID)
 	{
-		FlightLimits.maxangle = (int32_t)EEMUL_DATA->MAXANGLE;
-		FlightLimits.maxrate = (int32_t)EEMUL_DATA->MAXRATE;
-		FlightLimits.maxyawrate = (int32_t)EEMUL_DATA->MAXYAWRATE;
+		FlightLimits.maxangle = (fix32)EEMUL_DATA->MAXANGLE;
+		FlightLimits.maxrate = (fix32)EEMUL_DATA->MAXRATE;
+		FlightLimits.maxyawrate = (fix32)EEMUL_DATA->MAXYAWRATE;
 	}
 	else
 	{
@@ -242,12 +244,15 @@ void InitMixer(void)
 		for (int i = 0; i < 8; i++)
 			for (int j = 0; j < 4; j++)
 				Mixer.mix[i][j] = 0;
+
+		for (int j = 0; j < 4; j++)
+				Mixer.mix[j][0] = 127;
+
 	}
 }
 
 fix32 PIDUpdatePitch(kalman_data *data)
 {
-	static int i = 0;
 	fix32 angle_error, rate_error, rate_aim, input;
 
 	input = GetInputLevel(PITCH_CHANNEL);
@@ -256,11 +261,13 @@ fix32 PIDUpdatePitch(kalman_data *data)
 	angle_error = fix32Mul(FlightLimits.maxangle, input) - (fix32)(data->x1*FP_MUL);
 	DataPitch.a_iState += fix32Mul(angle_error, DataPitch.a_ki);
 
+	// If integral is to big, limit it
 	if (DataPitch.a_iState > DataPitch.a_imax)
 		DataPitch.a_iState = DataPitch.a_imax;
 	else if (DataPitch.a_iState < -DataPitch.a_imax)
 		DataPitch.a_iState = -DataPitch.a_imax;
 
+	// Calculate the desired rate and limit if it's to big
 	rate_aim = DataPitch.a_iState + fix32Mul(angle_error, DataPitch.a_kp);
 
 	if (rate_aim > FlightLimits.maxrate)
@@ -272,6 +279,7 @@ fix32 PIDUpdatePitch(kalman_data *data)
 	rate_error = rate_aim - (fix32)((data->x2 - data->x3)*FP_MUL);
 	DataPitch.r_iState = DataPitch.r_iState + fix32Mul(rate_error, DataPitch.r_ki);
 
+	// If integral is to big, limit it
 	if (DataPitch.r_iState > DataPitch.r_imax)
 		DataPitch.r_iState = DataPitch.r_imax;
 	else if (DataPitch.r_iState < -DataPitch.r_imax)
@@ -282,22 +290,23 @@ fix32 PIDUpdatePitch(kalman_data *data)
 
 fix32 PIDUpdateRoll(kalman_data *data)
 {	
-	static int i = 0;
 	fix32 angle_error, rate_error, rate_aim, input;
 	
 	input = GetInputLevel(ROLL_CHANNEL);
-		
+
 	/* Angle regulator starts here! */
 	angle_error = fix32Mul(FlightLimits.maxangle, input) - (fix32)(data->x1*FP_MUL);
 	DataRoll.a_iState += fix32Mul(angle_error, DataRoll.a_ki);
-	
+
+	// If integral is to big, limit it
 	if (DataRoll.a_iState > DataRoll.a_imax)
 		DataRoll.a_iState = DataRoll.a_imax;
 	else if (DataRoll.a_iState < -DataRoll.a_imax)
 		DataRoll.a_iState = -DataRoll.a_imax;
 	
+	// Calculate the desired rate and limit if it's to big
 	rate_aim = DataRoll.a_iState + fix32Mul(angle_error, DataRoll.a_kp);
-	
+
 	if (rate_aim > FlightLimits.maxrate)
 		rate_aim = FlightLimits.maxrate;
 	else if (rate_aim < -FlightLimits.maxrate)
@@ -306,7 +315,8 @@ fix32 PIDUpdateRoll(kalman_data *data)
 	/* Rate regulator starts here! */
 	rate_error = rate_aim - (fix32)((data->x2 - data->x3)*FP_MUL);
 	DataRoll.r_iState = DataRoll.r_iState + fix32Mul(rate_error, DataRoll.r_ki);
-	
+
+	// If integral is to big, limit it
 	if (DataRoll.r_iState > DataRoll.r_imax)
 		DataRoll.r_iState = DataRoll.r_imax;
 	else if (DataRoll.r_iState < -DataRoll.r_imax)
@@ -346,24 +356,24 @@ void UpdOutputs(kalman_data *data_xz, kalman_data *data_yz, float gyro_tmp)
 			pid_roll = PIDUpdateRoll(data_yz);
 			pid_yaw = PIDUpdateYaw(gyro_tmp);
 			
-			thr_base = fix32Mul(MAX_PWM, GetInputLevel(THROTTLE_CHANNEL));
+			thr_base = fix32Mul(MAX_PWM*FP_MUL, GetInputLevel(THROTTLE_CHANNEL));
 			
 			for (int i = 0; i < 8; i++)		// Manual fixed point multiplication and FP to INT
 			{
 				PWM_setOutput((int)((thr_base*Mixer.mix[i][0] + pid_pitch*Mixer.mix[i][1] + \
-								pid_roll*Mixer.mix[i][2] + pid_yaw*Mixer.mix[i][3]) >> 15), i);
+									 pid_roll*Mixer.mix[i][2] + pid_yaw*Mixer.mix[i][3]) >> 15), i);
 			}
 		}
 		
 		else
 		{
-			for (uint8_t i = 0; i < 8; i++)
+			for (int i = 0; i < 8; i++)
 				PWM_setOutput(MAX_PWM/18, i);
 		}
 	}
 	else
 	{
-		for (uint8_t i = 0; i < 8; i++)
+		for (int i = 0; i < 8; i++)
 			PWM_setOutput(0, i);
 	}
 }

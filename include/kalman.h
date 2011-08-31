@@ -9,7 +9,7 @@
 #define Q2 			100.0f		// How well do the model represent the changes of Angular Velocity
 #define Q3 			0.01f		// How well do the model represent the changes of Gyro Bias (changes very slowly)
 // R diagonal 2x2 with these elements on diagonal
-#define R1 			200.0f		// How much do we trust the measurement of Angle
+#define R1 			1000.0f		// How much do we trust the measurement of Angle
 #define R2 			1000.0f		// How much do we trust the measurement of Angular Velocity
 
 struct _kalman_data
