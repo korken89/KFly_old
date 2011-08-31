@@ -26,7 +26,67 @@ void rxPing(void)
 
 void rxSaveToFlash(void)
 {
-	/* Add save to flash code */
+	// Prepare data for flash save
+	uint32_t flash_data[IAP_FLASH_PAGE_SIZE_WORDS*2];
+	int32_t i = 0;
+
+	memset((int *)flash_data, 0, IAP_FLASH_PAGE_SIZE_WORDS*2);
+
+	// KFly ID and Version Info
+	flash_data[i++] = KFLY_ID;
+	i += 3;
+	flash_data[i++] = FlightLimits.maxangle;
+	flash_data[i++] = FlightLimits.maxrate;
+	flash_data[i++] = FlightLimits.maxyawrate;
+
+	// Pitch regulator Coefficients
+	flash_data[i++] = DataPitch.r_kp;
+	flash_data[i++] = DataPitch.r_ki;
+	flash_data[i++] = DataPitch.a_kp;
+	flash_data[i++] = DataPitch.a_ki;
+	flash_data[i++] = DataPitch.r_imax;
+	flash_data[i++] = DataPitch.a_imax;
+
+	// Roll regulator Coefficients
+	flash_data[i++] = DataRoll.r_kp;
+	flash_data[i++] = DataRoll.r_ki;
+	flash_data[i++] = DataRoll.a_kp;
+	flash_data[i++] = DataRoll.a_ki;
+	flash_data[i++] = DataRoll.r_imax;
+	flash_data[i++] = DataRoll.a_imax;
+
+	// Yaw regulator Coefficients
+	flash_data[i++] = DataYaw.r_kp;
+	flash_data[i++] = DataYaw.r_ki;
+	flash_data[i++] = DataYaw.a_kp;
+	flash_data[i++] = DataYaw.a_ki;
+	flash_data[i++] = DataYaw.r_imax;
+	flash_data[i++] = DataYaw.a_imax;
+
+	// Mixer Constants
+	for (int j = 0; j < 8; j++)
+		for (int k = 0; k < 4; k++)
+			flash_data[i++] = (uint32_t)Mixer.mix[j][k];
+
+	// Role Data
+	flash_data[i++] = InputCalibration.role;
+
+	// Channel Calibration
+	for (int j = 0; j < 8; j++)
+	{
+		flash_data[i++] = InputCalibration.ch_top[j];
+		flash_data[i++] = InputCalibration.ch_center[j];
+		flash_data[i++] = InputCalibration.ch_bottom[j];
+	}
+
+	taskENTER_CRITICAL();
+	{
+		u32IAP_PrepareSectors(29, 29);
+		u32IAP_EraseSectors(29, 29);
+		u32IAP_PrepareSectors(29, 29);
+		u32IAP_CopyRAMToFlash(EEMUL_BASE, (uint32_t)flash_data, IAP_FLASH_PAGE_SIZE_BYTES*2);
+	}
+	taskEXIT_CRITICAL();
 }
 
 void rxGetRegulatorData(void)

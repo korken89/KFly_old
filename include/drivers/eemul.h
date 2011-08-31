@@ -1,12 +1,14 @@
 /* Data in EEPROM Emulation section
+ * Data is stored in the 29th (last) sector of the
+ * chip and there is 32kB available space.
  * Data structure:
- * - ID:						1  word
+ * - ID:						1 word
  * - Version:					3 words
  * - Flight Limits:				3 words
- * - PID Data: 					24 words
- * - Mixers Data: 				8 words
+ * - PID Data: 					18 words
+ * - Mixers Data: 				32 words
  * - Input Calibration Data:	25 words
- * Total size: 64 words = 256 bytes = 1 page
+ * Total size: 82 words
  * */
 
 #include "lpc_types.h"
@@ -58,7 +60,7 @@ typedef struct
 	 * MIX[n][2] is Roll Gain
 	 * MIX[n][3] is Yaw Gain
 	 */
-	__I  uint8_t MIX[8][4];
+	__I  uint32_t MIX[8][4];
 	/* --- END MIXER CONSTANTS --- */
 	
 	/* --- START RC INPUT CAIBRATION CONSTANTS --- */

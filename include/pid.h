@@ -26,6 +26,7 @@
 #include "pwm.h"
 #include "sensors.h"
 #include "leds.h"
+#include "timer.h"
 
 typedef struct {
 	int32_t debug1;

@@ -1,6 +1,17 @@
 #ifndef __TELEMETRYPARSERS_H__
 #define __TELEMETRYPARSERS_H__
 
+/* Scheduler includes. */
+#include "FreeRTOS.h"
+#include "task.h"
+
+/* KFly includes */
+#include "configKFly.h"
+#include "fmath.h"
+#include "eemul.h"
+
+/* Includes */
+#include "iap.h"
 #include "lpc_types.h"
 #include "uart.h"
 #include "input.h"

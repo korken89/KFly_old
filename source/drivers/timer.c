@@ -55,7 +55,7 @@ void Timer2_StopCount(void)
 	char *str;
 	str = itoa(tmp-15, 10);					// 15 is the number of cycles it takes for the timing functions to execute.
 	UART0_SendData(str, ksizeof(str));
-	UART0_SendData(" clocks\0", 8);
+	UART0_SendData("\n", 1);
 }
 
 void Timer0_IRQHandler(void)

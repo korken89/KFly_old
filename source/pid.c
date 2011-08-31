@@ -237,17 +237,13 @@ void InitMixer(void)
 	{
 		for (int i = 0; i < 8; i++)
 			for (int j = 0; j < 4; j++)
-				Mixer.mix[i][j] = (fix8)EEMUL_DATA->MIX[i][j];
+				Mixer.mix[i][j] = (fix32)EEMUL_DATA->MIX[i][j];
 	}
 	else
 	{
 		for (int i = 0; i < 8; i++)
 			for (int j = 0; j < 4; j++)
 				Mixer.mix[i][j] = 0;
-
-		for (int j = 0; j < 4; j++)
-				Mixer.mix[j][0] = 127;
-
 	}
 }
 

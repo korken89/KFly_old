@@ -1,5 +1,5 @@
 /**
- *		Hardware Abstraction Layer for sensors. 
+ *	Hardware Abstraction Layer for sensors.
  **/
 
 #include "sensors.h"
@@ -22,7 +22,7 @@ void ReadAcc(float *data)
 	rate[1] = (int16_t)((temp[3]<<8)|temp[2]);
 	rate[2] = (int16_t)((temp[5]<<8)|temp[4]);
 
-	// Shift away the new_data bit and 0-bit (Page 22 of the BMA180 data sheet)
+	// Shift away the new_data-bit and 0-bit (Page 22 of the BMA180 data sheet)
 	rate[0] >>= 2;
 	rate[1] >>= 2;
 	rate[2] >>= 2;
@@ -48,7 +48,6 @@ void ReadAcc(float *data)
 		*(data+2) = -(float)rate[2];
 	#endif
 }
-
 
 /**
  * Returns an arrays with X, Y and Z in deg/s.

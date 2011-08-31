@@ -14,8 +14,8 @@ void InitInputs(void)
 {
 	if (EEMUL_DATA->ID == KFLY_ID)
 	{
-		uint32_t role = EEMUL_DATA->INPUT_ROLE;
-		InputCalibration.role = 0;
+		//uint32_t role = EEMUL_DATA->INPUT_ROLE;
+		InputCalibration.role = EEMUL_DATA->INPUT_ROLE;
 		
 		// Load role data
 		/* Role 	(3 bits):
@@ -28,11 +28,11 @@ void InitInputs(void)
 		 * Aux 2	(18-20)
 		 * Aux 3	(21-23)
 		 */
-		for (uint8_t i = 0; i < 8; i++)
+		/*for (uint8_t i = 0; i < 8; i++)
 		{
 			InputCalibration.role |= ((i << (3*(role & 0x07))) & 0x07);
 			role >>= 3;
-		}
+		}*/
 		
 		// Load calibration data
 		for (int i = 0; i < 8; i++)
