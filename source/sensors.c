@@ -15,37 +15,37 @@ void ReadAcc(float *data)
 	uint8_t temp[6];
 	BMA180_BurstRead(temp, NULL);
 	
-	int32_t rate[3];
+	int32_t acceleration[3];
 
-	// Cast to int16_t to get correct types
-	rate[0] = (int16_t)((temp[1]<<8)|temp[0]);
-	rate[1] = (int16_t)((temp[3]<<8)|temp[2]);
-	rate[2] = (int16_t)((temp[5]<<8)|temp[4]);
+	// Cast to int16_t to get correct signs
+	acceleration[0] = (int16_t)((temp[1]<<8)|temp[0]);
+	acceleration[1] = (int16_t)((temp[3]<<8)|temp[2]);
+	acceleration[2] = (int16_t)((temp[5]<<8)|temp[4]);
 
-	// Shift away the new_data-bit and 0-bit (Page 22 of the BMA180 data sheet)
-	rate[0] >>= 2;
-	rate[1] >>= 2;
-	rate[2] >>= 2;
+	// Shift away the new_data-bit and 0-space-bit (Page 22 of the BMA180 data sheet)
+	acceleration[0] >>= 2;
+	acceleration[1] >>= 2;
+	acceleration[2] >>= 2;
 
 	// X-axis
 	#if configFLIP_ACC_X == 0
-		*data = (float)rate[0];
+		*data = (float)acceleration[0];
 	#else
-		*data = -(float)rate[0];
+		*data = -(float)acceleration[0];
 	#endif
 	
 	// Y-axis
 	#if configFLIP_ACC_Y == 0
-		*(data+1) = (float)rate[1];
+		*(data+1) = (float)acceleration[1];
 	#else
-		*(data+1) = -(float)rate[1];
+		*(data+1) = -(float)acceleration[1];
 	#endif
 	
 	// Z-axis
 	#if configFLIP_ACC_Z == 0
-		*(data+2) = (float)rate[2];
+		*(data+2) = (float)acceleration[2];
 	#else
-		*(data+2) = -(float)rate[2];
+		*(data+2) = -(float)acceleration[2];
 	#endif
 }
 
@@ -59,7 +59,7 @@ void ReadGyroRate(float *data)
 	
 	int32_t rate[3];
 
-	// Cast to int16_t to get correct types
+	// Cast to int16_t to get correct signs
 	rate[0] = (int16_t)((temp[0]<<8)|temp[1]);
 	rate[1] = (int16_t)((temp[2]<<8)|temp[3]);
 	rate[2] = (int16_t)((temp[4]<<8)|temp[5]);
